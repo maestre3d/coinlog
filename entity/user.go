@@ -13,12 +13,12 @@ type User struct {
 	Auditable   valueobject.Auditable
 }
 
-type NewUserArgs struct {
+type UserArgs struct {
 	ID          string `validate:"required"`
 	DisplayName string `validate:"required,lte=96"`
 }
 
-func NewUser(args NewUserArgs) (User, error) {
+func NewUser(args UserArgs) (User, error) {
 	if err := validate.Struct(args); err != nil {
 		return User{}, err
 	}
@@ -33,4 +33,14 @@ func NewUser(args NewUserArgs) (User, error) {
 			UpdatedAt: time.Now().UTC(),
 		},
 	}, nil
+}
+
+func (u *User) Update(args UserArgs) error {
+	if err := validate.Struct(args); err != nil {
+		return err
+	}
+	u.DisplayName = args.DisplayName
+	u.Auditable.Version++
+	u.Auditable.UpdatedAt = time.Now().UTC()
+	return nil
 }

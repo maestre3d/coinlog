@@ -43,6 +43,7 @@ func provideHttpRoutes(cfg coinlogHTTPConfig, ctrls httpCtrl) *controller.MuxHTT
 func NewCoinlogHTTP() (*CoinlogHTTP, func(), error) {
 	wire.Build(
 		kernelCfgSet,
+		persistence.NewEntClient,
 		userSet,
 		controller.NewLivenessHTTP,
 		wire.Struct(new(httpCtrl), "*"),

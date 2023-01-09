@@ -27,7 +27,11 @@ func NewCoinlogHTTP() (*CoinlogHTTP, func(), error) {
 		Database:    databaseSQL,
 	}
 	livenessHTTP := controller.NewLivenessHTTP()
-	userSQL := persistence.NewUserSQL()
+	client, cleanup, err := persistence.NewEntClient(databaseSQL)
+	if err != nil {
+		return nil, nil, err
+	}
+	userSQL := persistence.NewUserSQL(client)
 	user := appservice.NewUser(userSQL)
 	userHTTP := controller.NewUserHTTP(user)
 	restapiHttpCtrl := httpCtrl{
@@ -41,6 +45,7 @@ func NewCoinlogHTTP() (*CoinlogHTTP, func(), error) {
 		Echo:   echo,
 	}
 	return coinlogHTTP, func() {
+		cleanup()
 	}, nil
 }
 
