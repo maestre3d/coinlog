@@ -1,9 +1,16 @@
 package entity
 
 import (
+	"github.com/maestre3d/coinlog/exception"
 	"time"
 
 	"github.com/maestre3d/coinlog/valueobject"
+)
+
+var (
+	ErrUserNotFound = exception.ResourceNotFound{
+		Resource: "user",
+	}
 )
 
 // User individual interacting the system.

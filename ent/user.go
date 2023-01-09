@@ -16,8 +16,6 @@ type User struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
-	// DisplayName holds the value of the "display_name" field.
-	DisplayName string `json:"display_name,omitempty"`
 	// IsActive holds the value of the "is_active" field.
 	IsActive bool `json:"is_active,omitempty"`
 	// Version holds the value of the "version" field.
@@ -26,6 +24,40 @@ type User struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// DisplayName holds the value of the "display_name" field.
+	DisplayName string `json:"display_name,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the UserQuery when eager-loading is set.
+	Edges UserEdges `json:"edges"`
+}
+
+// UserEdges holds the relations/edges for other nodes in the graph.
+type UserEdges struct {
+	// Contacts holds the value of the contacts edge.
+	Contacts []*Contact `json:"contacts,omitempty"`
+	// ContactLinks holds the value of the contact_links edge.
+	ContactLinks []*Contact `json:"contact_links,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [2]bool
+}
+
+// ContactsOrErr returns the Contacts value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) ContactsOrErr() ([]*Contact, error) {
+	if e.loadedTypes[0] {
+		return e.Contacts, nil
+	}
+	return nil, &NotLoadedError{edge: "contacts"}
+}
+
+// ContactLinksOrErr returns the ContactLinks value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) ContactLinksOrErr() ([]*Contact, error) {
+	if e.loadedTypes[1] {
+		return e.ContactLinks, nil
+	}
+	return nil, &NotLoadedError{edge: "contact_links"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -62,12 +94,6 @@ func (u *User) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				u.ID = value.String
 			}
-		case user.FieldDisplayName:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field display_name", values[i])
-			} else if value.Valid {
-				u.DisplayName = value.String
-			}
 		case user.FieldIsActive:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field is_active", values[i])
@@ -92,9 +118,25 @@ func (u *User) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				u.UpdatedAt = value.Time
 			}
+		case user.FieldDisplayName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field display_name", values[i])
+			} else if value.Valid {
+				u.DisplayName = value.String
+			}
 		}
 	}
 	return nil
+}
+
+// QueryContacts queries the "contacts" edge of the User entity.
+func (u *User) QueryContacts() *ContactQuery {
+	return (&UserClient{config: u.config}).QueryContacts(u)
+}
+
+// QueryContactLinks queries the "contact_links" edge of the User entity.
+func (u *User) QueryContactLinks() *ContactQuery {
+	return (&UserClient{config: u.config}).QueryContactLinks(u)
 }
 
 // Update returns a builder for updating this User.
@@ -120,9 +162,6 @@ func (u *User) String() string {
 	var builder strings.Builder
 	builder.WriteString("User(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", u.ID))
-	builder.WriteString("display_name=")
-	builder.WriteString(u.DisplayName)
-	builder.WriteString(", ")
 	builder.WriteString("is_active=")
 	builder.WriteString(fmt.Sprintf("%v", u.IsActive))
 	builder.WriteString(", ")
@@ -134,6 +173,9 @@ func (u *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(u.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("display_name=")
+	builder.WriteString(u.DisplayName)
 	builder.WriteByte(')')
 	return builder.String()
 }

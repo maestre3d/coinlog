@@ -34,9 +34,13 @@ func NewCoinlogHTTP() (*CoinlogHTTP, func(), error) {
 	userSQL := persistence.NewUserSQL(client)
 	user := appservice.NewUser(userSQL)
 	userHTTP := controller.NewUserHTTP(user)
+	contactSQL := persistence.NewContactSQL(client)
+	contact := appservice.NewContact(contactSQL)
+	contactHTTP := controller.NewContactHTTP(contact)
 	restapiHttpCtrl := httpCtrl{
 		Liveness: livenessHTTP,
 		User:     userHTTP,
+		Contact:  contactHTTP,
 	}
 	muxHTTP := provideHttpRoutes(restapiCoinlogHTTPConfig, restapiHttpCtrl)
 	echo := controller.NewEcho(serverHTTP, muxHTTP)
@@ -51,19 +55,22 @@ func NewCoinlogHTTP() (*CoinlogHTTP, func(), error) {
 
 // wire.go:
 
-// Holds all controllers for HTTP protocol, wire auto-binds inner deps.
-type httpCtrl struct {
-	Liveness controller.LivenessHTTP
-	User     controller.UserHTTP
-}
-
 var kernelCfgSet = wire.NewSet(configuration.NewApplication, configuration.NewServerHTTP, configuration.NewDatabaseSQL, wire.Struct(new(coinlogHTTPConfig), "*"))
 
 var userSet = wire.NewSet(wire.Bind(new(repository.User), new(persistence.UserSQL)), persistence.NewUserSQL, appservice.NewUser, controller.NewUserHTTP)
 
+var contactSet = wire.NewSet(wire.Bind(new(repository.Contact), new(persistence.ContactSQL)), persistence.NewContactSQL, appservice.NewContact, controller.NewContactHTTP)
+
+// Holds all controllers for HTTP protocol, wire auto-binds inner deps.
+type httpCtrl struct {
+	Liveness controller.LivenessHTTP
+	User     controller.UserHTTP
+	Contact  controller.ContactHTTP
+}
+
 func provideHttpRoutes(cfg coinlogHTTPConfig, ctrls httpCtrl) *controller.MuxHTTP {
 	mux := controller.NewMux(cfg.Application, cfg.Server)
 
-	mux.Add(ctrls.Liveness, ctrls.User)
+	mux.Add(ctrls.Liveness, ctrls.User, ctrls.Contact)
 	return mux
 }

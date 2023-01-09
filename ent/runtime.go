@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"github.com/maestre3d/coinlog/ent/contact"
 	"github.com/maestre3d/coinlog/ent/schema"
 	"github.com/maestre3d/coinlog/ent/user"
 )
@@ -11,6 +12,16 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	contactFields := schema.Contact{}.Fields()
+	_ = contactFields
+	// contactDescDisplayName is the schema descriptor for display_name field.
+	contactDescDisplayName := contactFields[1].Descriptor()
+	// contact.DisplayNameValidator is a validator for the "display_name" field. It is called by the builders before save.
+	contact.DisplayNameValidator = contactDescDisplayName.Validators[0].(func(string) error)
+	// contactDescID is the schema descriptor for id field.
+	contactDescID := contactFields[0].Descriptor()
+	// contact.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	contact.IDValidator = contactDescID.Validators[0].(func(string) error)
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescDisplayName is the schema descriptor for display_name field.

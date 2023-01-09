@@ -5,5 +5,5 @@ import (
 )
 
 type User interface {
-	Repository[entity.User]
+	Repository[string, entity.User]
 }

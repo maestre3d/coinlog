@@ -11,12 +11,6 @@ import (
 	"github.com/maestre3d/coinlog/repository"
 )
 
-// Holds all controllers for HTTP protocol, wire auto-binds inner deps.
-type httpCtrl struct {
-	Liveness controller.LivenessHTTP
-	User     controller.UserHTTP
-}
-
 var kernelCfgSet = wire.NewSet(
 	configuration.NewApplication,
 	configuration.NewServerHTTP,
@@ -31,12 +25,26 @@ var userSet = wire.NewSet(
 	controller.NewUserHTTP,
 )
 
+var contactSet = wire.NewSet(
+	wire.Bind(new(repository.Contact), new(persistence.ContactSQL)),
+	persistence.NewContactSQL,
+	appservice.NewContact,
+	controller.NewContactHTTP,
+)
+
+// Holds all controllers for HTTP protocol, wire auto-binds inner deps.
+type httpCtrl struct {
+	Liveness controller.LivenessHTTP
+	User     controller.UserHTTP
+	Contact  controller.ContactHTTP
+}
+
 func provideHttpRoutes(cfg coinlogHTTPConfig, ctrls httpCtrl) *controller.MuxHTTP {
 	mux := controller.NewMux(cfg.Application, cfg.Server)
 	// Add desired controllers here in single liner -method accepts variadic-.
 	//
 	// e.g. mux.Add(ctrls.Report, ctrls.Foo, ctrls.Bar)
-	mux.Add(ctrls.Liveness, ctrls.User)
+	mux.Add(ctrls.Liveness, ctrls.User, ctrls.Contact)
 	return mux
 }
 
@@ -45,6 +53,7 @@ func NewCoinlogHTTP() (*CoinlogHTTP, func(), error) {
 		kernelCfgSet,
 		persistence.NewEntClient,
 		userSet,
+		contactSet,
 		controller.NewLivenessHTTP,
 		wire.Struct(new(httpCtrl), "*"),
 		provideHttpRoutes,

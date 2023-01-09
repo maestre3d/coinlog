@@ -2,11 +2,9 @@ package persistence
 
 import (
 	"context"
-	"github.com/maestre3d/coinlog/exception"
-	"log"
-	"strconv"
 
 	"github.com/maestre3d/coinlog/ent"
+	"github.com/maestre3d/coinlog/ent/predicate"
 	"github.com/maestre3d/coinlog/ent/user"
 	"github.com/maestre3d/coinlog/entity"
 	"github.com/maestre3d/coinlog/model"
@@ -39,46 +37,34 @@ func (u UserSQL) Save(ctx context.Context, v entity.User) error {
 		Exec(ctx)
 }
 
-func (u UserSQL) Get(ctx context.Context, v *entity.User) (found bool, err error) {
-	if v == nil {
-		return false, nil
-	}
-	usr, err := u.client.User.Get(ctx, v.ID)
+func (u UserSQL) Get(ctx context.Context, key string) (entity.User, error) {
+	out, err := u.client.User.Get(ctx, key)
 	if err != nil && ent.IsNotFound(err) {
-		return false, nil
+		return entity.User{}, entity.ErrUserNotFound
 	} else if err != nil {
-		return false, err
+		return entity.User{}, err
 	}
-	model.NewUserFromSQL(usr, v)
-	return true, nil
+	return model.NewUserFromSQL(out), nil
 }
 
-func (u UserSQL) Search(ctx context.Context, c valueobject.Criteria) (items []entity.User, nextPage valueobject.PageToken, err error) {
-	pageTokenDecode := valueobject.DecodePageToken(c.PageToken)
-	pageOffset, _ := strconv.Atoi(pageTokenDecode)
-	usersSQL, err := u.client.User.Query().
-		Where(user.IsActive(true)).
-		Limit(c.Limit).
-		Offset(pageOffset).
-		All(ctx)
-	if err != nil {
-		return nil, nil, err
-	} else if len(usersSQL) == 0 {
-		return nil, nil, exception.ResourceNotFound{Resource: "user"}
-	}
-
-	items = make([]entity.User, 0, len(usersSQL))
-	for _, usrSQL := range usersSQL {
-		usr := entity.User{}
-		model.NewUserFromSQL(usrSQL, &usr)
-		items = append(items, usr)
-	}
-	pageOffset += len(items)
-	nextPage = valueobject.NewPageToken(strconv.Itoa(pageOffset))
-	log.Print(nextPage.String())
-	return
+func (u UserSQL) search(ctx context.Context, c valueobject.Criteria,
+	predicates ...predicate.User) ([]entity.User, valueobject.PageToken, error) {
+	return paginateSQLFunc[*ent.User, entity.User](ctx, c,
+		model.NewUserFromSQL,
+		func(ctx context.Context, limit, offset int) ([]*ent.User, error) {
+			return u.client.User.Query().
+				Where(predicates...).
+				Limit(c.Limit).
+				Offset(offset).
+				All(ctx)
+		})
 }
 
-func (u UserSQL) Remove(ctx context.Context, v entity.User) error {
-	return u.client.User.DeleteOneID(v.ID).Exec(ctx)
+func (u UserSQL) Search(ctx context.Context, c valueobject.Criteria) ([]entity.User,
+	valueobject.PageToken, error) {
+	return u.search(ctx, c, user.IsActive(true))
+}
+
+func (u UserSQL) Remove(ctx context.Context, k string) error {
+	return u.client.User.DeleteOneID(k).Exec(ctx)
 }

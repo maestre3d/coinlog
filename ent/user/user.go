@@ -7,8 +7,6 @@ const (
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldDisplayName holds the string denoting the display_name field in the database.
-	FieldDisplayName = "display_name"
 	// FieldIsActive holds the string denoting the is_active field in the database.
 	FieldIsActive = "is_active"
 	// FieldVersion holds the string denoting the version field in the database.
@@ -17,18 +15,38 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
+	// FieldDisplayName holds the string denoting the display_name field in the database.
+	FieldDisplayName = "display_name"
+	// EdgeContacts holds the string denoting the contacts edge name in mutations.
+	EdgeContacts = "contacts"
+	// EdgeContactLinks holds the string denoting the contact_links edge name in mutations.
+	EdgeContactLinks = "contact_links"
 	// Table holds the table name of the user in the database.
 	Table = "users"
+	// ContactsTable is the table that holds the contacts relation/edge.
+	ContactsTable = "contacts"
+	// ContactsInverseTable is the table name for the Contact entity.
+	// It exists in this package in order to avoid circular dependency with the "contact" package.
+	ContactsInverseTable = "contacts"
+	// ContactsColumn is the table column denoting the contacts relation/edge.
+	ContactsColumn = "user_contacts"
+	// ContactLinksTable is the table that holds the contact_links relation/edge.
+	ContactLinksTable = "contacts"
+	// ContactLinksInverseTable is the table name for the Contact entity.
+	// It exists in this package in order to avoid circular dependency with the "contact" package.
+	ContactLinksInverseTable = "contacts"
+	// ContactLinksColumn is the table column denoting the contact_links relation/edge.
+	ContactLinksColumn = "user_contact_links"
 )
 
 // Columns holds all SQL columns for user fields.
 var Columns = []string{
 	FieldID,
-	FieldDisplayName,
 	FieldIsActive,
 	FieldVersion,
 	FieldCreatedAt,
 	FieldUpdatedAt,
+	FieldDisplayName,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

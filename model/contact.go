@@ -7,13 +7,16 @@ import (
 	"github.com/maestre3d/coinlog/valueobject"
 )
 
-var NewUserFromSQL domainutil.ConvertFunc[*ent.User, entity.User] = func(src *ent.User) entity.User {
+var NewContactFromSQL domainutil.ConvertFunc[*ent.Contact, entity.Contact] = func(src *ent.Contact) entity.Contact {
 	if src == nil {
-		return entity.User{}
+		return entity.Contact{}
 	}
-	return entity.User{
+	return entity.Contact{
 		ID:          src.ID,
+		User:        NewUserFromSQL(src.Edges.Owner),
+		LinkedTo:    NewUserFromSQL(src.Edges.LinkedTo),
 		DisplayName: src.DisplayName,
+		ImageURL:    src.ImageURL,
 		Auditable: valueobject.Auditable{
 			IsActive:  src.IsActive,
 			Version:   src.Version,
