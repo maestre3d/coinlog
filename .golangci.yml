@@ -1,0 +1,45 @@
+# Options for analysis running.
+run:
+  issues-exit-code: 0
+  tests: false
+
+output:
+  format: github-actions
+
+linters:
+  enable:
+    - gocyclo
+    - gofmt
+    - gosec
+    - prealloc
+    - goconst
+  presets:
+    - bugs
+    - comment
+    - complexity
+    - error
+    - format
+    - import
+    - metalinter
+    - module
+    - performance
+    - sql
+    - style
+    - test
+  fast: true
+
+linters-settings:
+  gosec:
+    exclude-generated: true
+    severity: medium
+    confidence: medium
+  govet:
+    check-shadowing: true
+    enable-all: true
+
+severity:
+  default-severity: error
+  rules:
+    - linters:
+        - gosec
+      severity: info
