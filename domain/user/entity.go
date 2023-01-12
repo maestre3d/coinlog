@@ -6,10 +6,11 @@ import (
 	"github.com/maestre3d/coinlog/domain"
 )
 
+// User individual interacting the system.
 type User struct {
 	ID          string
 	DisplayName string // req
-	Auditable   domain.Auditable
+	domain.Auditable
 }
 
 var _ domain.Nullable[User] = &User{}
@@ -35,6 +36,6 @@ func (u *User) PtrIfNotEmpty() *User {
 }
 
 func (u *User) Update() {
-	u.Auditable.Version += 1
-	u.Auditable.UpdatedAt = time.Now().UTC()
+	u.Version += 1
+	u.UpdatedAt = time.Now().UTC()
 }

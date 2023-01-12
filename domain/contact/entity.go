@@ -7,13 +7,14 @@ import (
 	"github.com/maestre3d/coinlog/domain/user"
 )
 
+// Contact organization or individual a User interacts with. Might be a User of the system.
 type Contact struct {
 	ID          string
 	User        user.User // FK ->  users, req (created by)
 	LinkedTo    user.User // FK ->  users (nullable)
 	DisplayName string    // req
 	ImageURL    string
-	Auditable   domain.Auditable
+	domain.Auditable
 }
 
 var _ domain.Nullable[Contact] = &Contact{}
