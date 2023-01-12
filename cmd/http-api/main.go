@@ -1,11 +1,9 @@
 package main
 
-import (
-	"github.com/maestre3d/coinlog/restapi"
-)
+import "github.com/maestre3d/coinlog/di"
 
 func main() {
-	app, clean, err := restapi.NewCoinlogHTTP()
+	app, clean, err := di.NewCoinlogHTTP()
 	if err != nil {
 		panic(err)
 	}

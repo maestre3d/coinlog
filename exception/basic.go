@@ -31,7 +31,7 @@ func (e ResourceNotFound) Error() string {
 }
 
 func (e ResourceNotFound) String() string {
-	return fmt.Sprintf("%s was not found", e.Resource)
+	return fmt.Sprintf("%s not found", e.Resource)
 }
 
 func (e ResourceNotFound) TypeName() string {
