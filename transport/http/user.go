@@ -21,7 +21,7 @@ func NewUserController(s user.Service) UserController {
 	}
 }
 
-func (u UserController) MapRoutes(e *echo.Echo) {}
+func (u UserController) MapRoutes(_ *echo.Echo) {}
 
 func (u UserController) MapVersionedRoutes(g *echo.Group) {
 	g.POST("/users", u.create)
@@ -32,7 +32,7 @@ func (u UserController) MapVersionedRoutes(g *echo.Group) {
 }
 
 func (u UserController) create(c echo.Context) error {
-	args := user.CreateArgs{}
+	args := user.CreateCommand{}
 	if err := c.Bind(&args); err != nil {
 		return err
 	}
@@ -52,7 +52,7 @@ func (u UserController) create(c echo.Context) error {
 }
 
 func (u UserController) update(c echo.Context) error {
-	args := user.UpdateArgs{}
+	args := user.UpdateCommand{}
 	if err := c.Bind(&args); err != nil {
 		return err
 	}

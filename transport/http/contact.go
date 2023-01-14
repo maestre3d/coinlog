@@ -32,7 +32,7 @@ func (u ContactController) MapVersionedRoutes(g *echo.Group) {
 }
 
 func (u ContactController) create(c echo.Context) error {
-	args := contact.CreateArgs{}
+	args := contact.CreateCommand{}
 	if err := c.Bind(&args); err != nil {
 		return err
 	}
@@ -53,7 +53,7 @@ func (u ContactController) create(c echo.Context) error {
 }
 
 func (u ContactController) update(c echo.Context) error {
-	args := contact.UpdateArgs{}
+	args := contact.UpdateCommand{}
 	if err := c.Bind(&args); err != nil {
 		return err
 	}

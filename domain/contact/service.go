@@ -20,7 +20,7 @@ func NewService(r Repository) Service {
 }
 
 func (s Service) Create(ctx context.Context, args any) error {
-	a := args.(CreateArgs)
+	a := args.(CreateCommand)
 	if err := domain.Validate.Struct(a); err != nil {
 		return err
 	}
@@ -39,7 +39,7 @@ func (s Service) getByID(ctx context.Context, id string) (Contact, error) {
 }
 
 func (s Service) Update(ctx context.Context, args any) error {
-	a := args.(UpdateArgs)
+	a := args.(UpdateCommand)
 	if err := domain.Validate.Struct(a); err != nil {
 		return err
 	}
@@ -47,7 +47,7 @@ func (s Service) Update(ctx context.Context, args any) error {
 	if err != nil {
 		return err
 	}
-	ctc.Update(a)
+	ctc.update(a)
 	return s.repo.Save(ctx, ctc)
 }
 

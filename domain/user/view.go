@@ -4,16 +4,6 @@ import (
 	"github.com/maestre3d/coinlog/domain"
 )
 
-type CreateArgs struct {
-	ID          string `json:"id" validate:"required"`
-	DisplayName string `json:"display_name" validate:"required,lte=96"`
-}
-
-type UpdateArgs struct {
-	ID          string `json:"id" validate:"required"`
-	DisplayName string `json:"display_name" validate:"required,lte=96"`
-}
-
 type View struct {
 	ID          string `json:"id"`
 	DisplayName string `json:"display_name"`

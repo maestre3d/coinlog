@@ -17,7 +17,7 @@ type Contact struct {
 	domain.Auditable
 }
 
-func newContact(args CreateArgs) Contact {
+func newContact(args CreateCommand) Contact {
 	c := Contact{
 		ID: args.ID,
 		User: user.User{
@@ -43,7 +43,7 @@ func newContact(args CreateArgs) Contact {
 	return c
 }
 
-func (c *Contact) Update(args UpdateArgs) {
+func (c *Contact) update(args UpdateCommand) {
 	if args.LinkedToID == "" {
 		c.LinkedTo = nil
 	} else {

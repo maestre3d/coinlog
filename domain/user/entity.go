@@ -13,7 +13,7 @@ type User struct {
 	domain.Auditable
 }
 
-func newUser(args CreateArgs) User {
+func newUser(args CreateCommand) User {
 	return User{
 		ID:          args.ID,
 		DisplayName: args.DisplayName,
@@ -26,7 +26,7 @@ func newUser(args CreateArgs) User {
 	}
 }
 
-func (u *User) Update() {
+func (u *User) update() {
 	u.Version += 1
 	u.UpdatedAt = time.Now().UTC()
 }
