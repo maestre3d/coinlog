@@ -17,6 +17,8 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldDisplayName holds the string denoting the display_name field in the database.
 	FieldDisplayName = "display_name"
+	// FieldLinkedToUser holds the string denoting the linked_to_user field in the database.
+	FieldLinkedToUser = "linked_to_user"
 	// FieldImageURL holds the string denoting the image_url field in the database.
 	FieldImageURL = "image_url"
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
@@ -38,7 +40,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	LinkedToInverseTable = "users"
 	// LinkedToColumn is the table column denoting the linked_to relation/edge.
-	LinkedToColumn = "user_contact_links"
+	LinkedToColumn = "linked_to_user"
 )
 
 // Columns holds all SQL columns for contact fields.
@@ -49,6 +51,7 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldDisplayName,
+	FieldLinkedToUser,
 	FieldImageURL,
 }
 
@@ -56,7 +59,6 @@ var Columns = []string{
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"user_contacts",
-	"user_contact_links",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

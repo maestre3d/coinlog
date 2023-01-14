@@ -80,6 +80,11 @@ func DisplayName(v string) predicate.Contact {
 	return predicate.Contact(sql.FieldEQ(FieldDisplayName, v))
 }
 
+// LinkedToUser applies equality check predicate on the "linked_to_user" field. It's identical to LinkedToUserEQ.
+func LinkedToUser(v string) predicate.Contact {
+	return predicate.Contact(sql.FieldEQ(FieldLinkedToUser, v))
+}
+
 // ImageURL applies equality check predicate on the "image_url" field. It's identical to ImageURLEQ.
 func ImageURL(v string) predicate.Contact {
 	return predicate.Contact(sql.FieldEQ(FieldImageURL, v))
@@ -278,6 +283,81 @@ func DisplayNameEqualFold(v string) predicate.Contact {
 // DisplayNameContainsFold applies the ContainsFold predicate on the "display_name" field.
 func DisplayNameContainsFold(v string) predicate.Contact {
 	return predicate.Contact(sql.FieldContainsFold(FieldDisplayName, v))
+}
+
+// LinkedToUserEQ applies the EQ predicate on the "linked_to_user" field.
+func LinkedToUserEQ(v string) predicate.Contact {
+	return predicate.Contact(sql.FieldEQ(FieldLinkedToUser, v))
+}
+
+// LinkedToUserNEQ applies the NEQ predicate on the "linked_to_user" field.
+func LinkedToUserNEQ(v string) predicate.Contact {
+	return predicate.Contact(sql.FieldNEQ(FieldLinkedToUser, v))
+}
+
+// LinkedToUserIn applies the In predicate on the "linked_to_user" field.
+func LinkedToUserIn(vs ...string) predicate.Contact {
+	return predicate.Contact(sql.FieldIn(FieldLinkedToUser, vs...))
+}
+
+// LinkedToUserNotIn applies the NotIn predicate on the "linked_to_user" field.
+func LinkedToUserNotIn(vs ...string) predicate.Contact {
+	return predicate.Contact(sql.FieldNotIn(FieldLinkedToUser, vs...))
+}
+
+// LinkedToUserGT applies the GT predicate on the "linked_to_user" field.
+func LinkedToUserGT(v string) predicate.Contact {
+	return predicate.Contact(sql.FieldGT(FieldLinkedToUser, v))
+}
+
+// LinkedToUserGTE applies the GTE predicate on the "linked_to_user" field.
+func LinkedToUserGTE(v string) predicate.Contact {
+	return predicate.Contact(sql.FieldGTE(FieldLinkedToUser, v))
+}
+
+// LinkedToUserLT applies the LT predicate on the "linked_to_user" field.
+func LinkedToUserLT(v string) predicate.Contact {
+	return predicate.Contact(sql.FieldLT(FieldLinkedToUser, v))
+}
+
+// LinkedToUserLTE applies the LTE predicate on the "linked_to_user" field.
+func LinkedToUserLTE(v string) predicate.Contact {
+	return predicate.Contact(sql.FieldLTE(FieldLinkedToUser, v))
+}
+
+// LinkedToUserContains applies the Contains predicate on the "linked_to_user" field.
+func LinkedToUserContains(v string) predicate.Contact {
+	return predicate.Contact(sql.FieldContains(FieldLinkedToUser, v))
+}
+
+// LinkedToUserHasPrefix applies the HasPrefix predicate on the "linked_to_user" field.
+func LinkedToUserHasPrefix(v string) predicate.Contact {
+	return predicate.Contact(sql.FieldHasPrefix(FieldLinkedToUser, v))
+}
+
+// LinkedToUserHasSuffix applies the HasSuffix predicate on the "linked_to_user" field.
+func LinkedToUserHasSuffix(v string) predicate.Contact {
+	return predicate.Contact(sql.FieldHasSuffix(FieldLinkedToUser, v))
+}
+
+// LinkedToUserIsNil applies the IsNil predicate on the "linked_to_user" field.
+func LinkedToUserIsNil() predicate.Contact {
+	return predicate.Contact(sql.FieldIsNull(FieldLinkedToUser))
+}
+
+// LinkedToUserNotNil applies the NotNil predicate on the "linked_to_user" field.
+func LinkedToUserNotNil() predicate.Contact {
+	return predicate.Contact(sql.FieldNotNull(FieldLinkedToUser))
+}
+
+// LinkedToUserEqualFold applies the EqualFold predicate on the "linked_to_user" field.
+func LinkedToUserEqualFold(v string) predicate.Contact {
+	return predicate.Contact(sql.FieldEqualFold(FieldLinkedToUser, v))
+}
+
+// LinkedToUserContainsFold applies the ContainsFold predicate on the "linked_to_user" field.
+func LinkedToUserContainsFold(v string) predicate.Contact {
+	return predicate.Contact(sql.FieldContainsFold(FieldLinkedToUser, v))
 }
 
 // ImageURLEQ applies the EQ predicate on the "image_url" field.

@@ -1,0 +1,4 @@
+-- create "users" table
+CREATE TABLE "users" ("id" character varying NOT NULL, "is_active" boolean NOT NULL, "version" integer NOT NULL, "created_at" timestamptz NOT NULL, "updated_at" timestamptz NOT NULL, "display_name" character varying NOT NULL, PRIMARY KEY ("id"));
+-- create "contacts" table
+CREATE TABLE "contacts" ("id" character varying NOT NULL, "is_active" boolean NOT NULL, "version" integer NOT NULL, "created_at" timestamptz NOT NULL, "updated_at" timestamptz NOT NULL, "display_name" character varying NOT NULL, "image_url" character varying NULL, "user_contacts" character varying NOT NULL, "linked_to_user" character varying NULL, PRIMARY KEY ("id"), CONSTRAINT "contacts_users_contact_links" FOREIGN KEY ("linked_to_user") REFERENCES "users" ("id") ON UPDATE NO ACTION ON DELETE SET NULL, CONSTRAINT "contacts_users_contacts" FOREIGN KEY ("user_contacts") REFERENCES "users" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION);

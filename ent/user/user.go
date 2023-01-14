@@ -36,7 +36,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "contact" package.
 	ContactLinksInverseTable = "contacts"
 	// ContactLinksColumn is the table column denoting the contact_links relation/edge.
-	ContactLinksColumn = "user_contact_links"
+	ContactLinksColumn = "linked_to_user"
 )
 
 // Columns holds all SQL columns for user fields.

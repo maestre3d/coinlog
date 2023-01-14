@@ -486,10 +486,7 @@ func (cq *ContactQuery) loadLinkedTo(ctx context.Context, query *UserQuery, node
 	ids := make([]string, 0, len(nodes))
 	nodeids := make(map[string][]*Contact)
 	for i := range nodes {
-		if nodes[i].user_contact_links == nil {
-			continue
-		}
-		fk := *nodes[i].user_contact_links
+		fk := nodes[i].LinkedToUser
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -503,7 +500,7 @@ func (cq *ContactQuery) loadLinkedTo(ctx context.Context, query *UserQuery, node
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_contact_links" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "linked_to_user" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)

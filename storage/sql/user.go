@@ -82,6 +82,9 @@ func (u UserStorage) find(ctx context.Context, cr domain.Criteria, pred ...predi
 }
 
 func (u UserStorage) Find(ctx context.Context, cr domain.Criteria) ([]user.User, domain.PageToken, error) {
+	if cr.Limit == 0 {
+		return nil, nil, nil
+	}
 	return u.find(ctx, cr, entuser.IsActive(true))
 }
 

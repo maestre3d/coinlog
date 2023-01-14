@@ -18,7 +18,7 @@ var (
 		{Name: "display_name", Type: field.TypeString},
 		{Name: "image_url", Type: field.TypeString, Nullable: true},
 		{Name: "user_contacts", Type: field.TypeString},
-		{Name: "user_contact_links", Type: field.TypeString, Nullable: true},
+		{Name: "linked_to_user", Type: field.TypeString, Nullable: true},
 	}
 	// ContactsTable holds the schema information for the "contacts" table.
 	ContactsTable = &schema.Table{

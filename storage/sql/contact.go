@@ -34,7 +34,7 @@ func newContactFromEnt(src *ent.Contact) contact.Contact {
 	return contact.Contact{
 		ID:          src.ID,
 		User:        newUserFromEnt(src.Edges.Owner),
-		LinkedTo:    newUserFromEnt(src.Edges.LinkedTo),
+		LinkedTo:    domain.PtrIfNotEmpty(newUserFromEnt(src.Edges.LinkedTo)),
 		DisplayName: src.DisplayName,
 		ImageURL:    src.ImageURL,
 		Auditable: domain.Auditable{
@@ -46,21 +46,47 @@ func newContactFromEnt(src *ent.Contact) contact.Contact {
 	}
 }
 
-func (c ContactStorage) Save(ctx context.Context, v contact.Contact) error {
+func (c ContactStorage) create(ctx context.Context, v contact.Contact) error {
 	stmt := c.db.Contact.Create().
 		SetID(v.ID).
 		SetDisplayName(v.DisplayName).
 		SetOwnerID(v.User.ID).
-		SetNillableLinkedToID(domain.PtrIfNotEmpty(v.LinkedTo.ID)).
+		SetImageURL(v.ImageURL).
+		SetIsActive(v.IsActive).
+		SetVersion(v.Version).
+		SetCreatedAt(v.CreatedAt).
+		SetUpdatedAt(v.UpdatedAt)
+
+	if v.LinkedTo != nil {
+		stmt = stmt.SetLinkedToUser(v.LinkedTo.ID)
+	}
+	return stmt.Exec(ctx)
+}
+
+func (c ContactStorage) update(ctx context.Context, v contact.Contact) error {
+	stmt := c.db.Contact.Update().
+		Where(entcontact.IDEQ(v.ID)).
+		SetDisplayName(v.DisplayName).
+		SetOwnerID(v.User.ID).
 		SetImageURL(v.ImageURL).
 		SetIsActive(v.Auditable.IsActive).
 		SetVersion(v.Auditable.Version).
-		SetCreatedAt(v.Auditable.CreatedAt).
-		SetUpdatedAt(v.Auditable.UpdatedAt)
-	if v.LinkedTo.ID == "" {
-		stmt.Mutation().ClearLinkedTo()
+		SetUpdatedAt(v.UpdatedAt)
+
+	if v.LinkedTo == nil {
+		stmt.ClearLinkedToUser()
+	} else {
+		stmt = stmt.SetLinkedToUser(v.LinkedTo.ID)
 	}
-	return stmt.OnConflictColumns(entcontact.FieldID).UpdateNewValues().Exec(ctx)
+	return stmt.Exec(ctx)
+}
+
+func (c ContactStorage) Save(ctx context.Context, v contact.Contact) error {
+	if v.Version == 1 {
+		return c.create(ctx, v)
+	}
+
+	return c.update(ctx, v)
 }
 
 func (c ContactStorage) Get(ctx context.Context, id string) (*contact.Contact, error) {
@@ -81,6 +107,8 @@ func (c ContactStorage) buildQueryFunc(pred ...predicate.Contact) querySQLFunc[*
 			Where(pred...).
 			Limit(limit).
 			Offset(offset).
+			WithOwner().
+			WithLinkedTo().
 			All(ctx)
 	}
 }

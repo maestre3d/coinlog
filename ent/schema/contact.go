@@ -27,6 +27,8 @@ func (Contact) Fields() []ent.Field {
 			Immutable(),
 		field.String("display_name").
 			NotEmpty(),
+		field.String("linked_to_user").
+			Optional(),
 		field.String("image_url").
 			Optional(),
 	}
@@ -42,6 +44,7 @@ func (Contact) Edges() []ent.Edge {
 		edge.From("linked_to", User.Type).
 			Ref("contact_links").
 			Unique().
+			Field("linked_to_user").
 			Annotations(
 				entsql.Annotation{
 					Table:        "",

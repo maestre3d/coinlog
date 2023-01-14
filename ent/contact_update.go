@@ -60,6 +60,26 @@ func (cu *ContactUpdate) SetDisplayName(s string) *ContactUpdate {
 	return cu
 }
 
+// SetLinkedToUser sets the "linked_to_user" field.
+func (cu *ContactUpdate) SetLinkedToUser(s string) *ContactUpdate {
+	cu.mutation.SetLinkedToUser(s)
+	return cu
+}
+
+// SetNillableLinkedToUser sets the "linked_to_user" field if the given value is not nil.
+func (cu *ContactUpdate) SetNillableLinkedToUser(s *string) *ContactUpdate {
+	if s != nil {
+		cu.SetLinkedToUser(*s)
+	}
+	return cu
+}
+
+// ClearLinkedToUser clears the value of the "linked_to_user" field.
+func (cu *ContactUpdate) ClearLinkedToUser() *ContactUpdate {
+	cu.mutation.ClearLinkedToUser()
+	return cu
+}
+
 // SetImageURL sets the "image_url" field.
 func (cu *ContactUpdate) SetImageURL(s string) *ContactUpdate {
 	cu.mutation.SetImageURL(s)
@@ -327,6 +347,26 @@ func (cuo *ContactUpdateOne) SetUpdatedAt(t time.Time) *ContactUpdateOne {
 // SetDisplayName sets the "display_name" field.
 func (cuo *ContactUpdateOne) SetDisplayName(s string) *ContactUpdateOne {
 	cuo.mutation.SetDisplayName(s)
+	return cuo
+}
+
+// SetLinkedToUser sets the "linked_to_user" field.
+func (cuo *ContactUpdateOne) SetLinkedToUser(s string) *ContactUpdateOne {
+	cuo.mutation.SetLinkedToUser(s)
+	return cuo
+}
+
+// SetNillableLinkedToUser sets the "linked_to_user" field if the given value is not nil.
+func (cuo *ContactUpdateOne) SetNillableLinkedToUser(s *string) *ContactUpdateOne {
+	if s != nil {
+		cuo.SetLinkedToUser(*s)
+	}
+	return cuo
+}
+
+// ClearLinkedToUser clears the value of the "linked_to_user" field.
+func (cuo *ContactUpdateOne) ClearLinkedToUser() *ContactUpdateOne {
+	cuo.mutation.ClearLinkedToUser()
 	return cuo
 }
 

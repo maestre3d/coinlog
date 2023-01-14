@@ -20,15 +20,6 @@ type View struct {
 	domain.Auditable
 }
 
-var _ domain.Nullable[View] = View{}
-
-func (v View) PtrIfNotEmpty() *View {
-	if v.ID == "" {
-		return nil
-	}
-	return &v
-}
-
 func NewView(usr User) View {
 	return View{
 		ID:          usr.ID,

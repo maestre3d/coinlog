@@ -357,6 +357,55 @@ func (m *ContactMutation) ResetDisplayName() {
 	m.display_name = nil
 }
 
+// SetLinkedToUser sets the "linked_to_user" field.
+func (m *ContactMutation) SetLinkedToUser(s string) {
+	m.linked_to = &s
+}
+
+// LinkedToUser returns the value of the "linked_to_user" field in the mutation.
+func (m *ContactMutation) LinkedToUser() (r string, exists bool) {
+	v := m.linked_to
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLinkedToUser returns the old "linked_to_user" field's value of the Contact entity.
+// If the Contact object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ContactMutation) OldLinkedToUser(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLinkedToUser is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLinkedToUser requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLinkedToUser: %w", err)
+	}
+	return oldValue.LinkedToUser, nil
+}
+
+// ClearLinkedToUser clears the value of the "linked_to_user" field.
+func (m *ContactMutation) ClearLinkedToUser() {
+	m.linked_to = nil
+	m.clearedFields[contact.FieldLinkedToUser] = struct{}{}
+}
+
+// LinkedToUserCleared returns if the "linked_to_user" field was cleared in this mutation.
+func (m *ContactMutation) LinkedToUserCleared() bool {
+	_, ok := m.clearedFields[contact.FieldLinkedToUser]
+	return ok
+}
+
+// ResetLinkedToUser resets all changes to the "linked_to_user" field.
+func (m *ContactMutation) ResetLinkedToUser() {
+	m.linked_to = nil
+	delete(m.clearedFields, contact.FieldLinkedToUser)
+}
+
 // SetImageURL sets the "image_url" field.
 func (m *ContactMutation) SetImageURL(s string) {
 	m.image_url = &s
@@ -457,7 +506,7 @@ func (m *ContactMutation) ClearLinkedTo() {
 
 // LinkedToCleared reports if the "linked_to" edge to the User entity was cleared.
 func (m *ContactMutation) LinkedToCleared() bool {
-	return m.clearedlinked_to
+	return m.LinkedToUserCleared() || m.clearedlinked_to
 }
 
 // LinkedToID returns the "linked_to" edge ID in the mutation.
@@ -518,7 +567,7 @@ func (m *ContactMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ContactMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 7)
 	if m.is_active != nil {
 		fields = append(fields, contact.FieldIsActive)
 	}
@@ -533,6 +582,9 @@ func (m *ContactMutation) Fields() []string {
 	}
 	if m.display_name != nil {
 		fields = append(fields, contact.FieldDisplayName)
+	}
+	if m.linked_to != nil {
+		fields = append(fields, contact.FieldLinkedToUser)
 	}
 	if m.image_url != nil {
 		fields = append(fields, contact.FieldImageURL)
@@ -555,6 +607,8 @@ func (m *ContactMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedAt()
 	case contact.FieldDisplayName:
 		return m.DisplayName()
+	case contact.FieldLinkedToUser:
+		return m.LinkedToUser()
 	case contact.FieldImageURL:
 		return m.ImageURL()
 	}
@@ -576,6 +630,8 @@ func (m *ContactMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldUpdatedAt(ctx)
 	case contact.FieldDisplayName:
 		return m.OldDisplayName(ctx)
+	case contact.FieldLinkedToUser:
+		return m.OldLinkedToUser(ctx)
 	case contact.FieldImageURL:
 		return m.OldImageURL(ctx)
 	}
@@ -621,6 +677,13 @@ func (m *ContactMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDisplayName(v)
+		return nil
+	case contact.FieldLinkedToUser:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLinkedToUser(v)
 		return nil
 	case contact.FieldImageURL:
 		v, ok := value.(string)
@@ -674,6 +737,9 @@ func (m *ContactMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *ContactMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(contact.FieldLinkedToUser) {
+		fields = append(fields, contact.FieldLinkedToUser)
+	}
 	if m.FieldCleared(contact.FieldImageURL) {
 		fields = append(fields, contact.FieldImageURL)
 	}
@@ -691,6 +757,9 @@ func (m *ContactMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *ContactMutation) ClearField(name string) error {
 	switch name {
+	case contact.FieldLinkedToUser:
+		m.ClearLinkedToUser()
+		return nil
 	case contact.FieldImageURL:
 		m.ClearImageURL()
 		return nil
@@ -716,6 +785,9 @@ func (m *ContactMutation) ResetField(name string) error {
 		return nil
 	case contact.FieldDisplayName:
 		m.ResetDisplayName()
+		return nil
+	case contact.FieldLinkedToUser:
+		m.ResetLinkedToUser()
 		return nil
 	case contact.FieldImageURL:
 		m.ResetImageURL()

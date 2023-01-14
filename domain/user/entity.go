@@ -13,8 +13,6 @@ type User struct {
 	domain.Auditable
 }
 
-var _ domain.Nullable[User] = &User{}
-
 func newUser(args CreateArgs) User {
 	return User{
 		ID:          args.ID,
@@ -26,13 +24,6 @@ func newUser(args CreateArgs) User {
 			UpdatedAt: time.Now().UTC(),
 		},
 	}
-}
-
-func (u *User) PtrIfNotEmpty() *User {
-	if u.ID == "" {
-		return nil
-	}
-	return u
 }
 
 func (u *User) Update() {

@@ -10,24 +10,20 @@ import (
 // Contact organization or individual a User interacts with. Might be a User of the system.
 type Contact struct {
 	ID          string
-	User        user.User // FK ->  users, req (created by)
-	LinkedTo    user.User // FK ->  users (nullable)
-	DisplayName string    // req
+	User        user.User  // FK ->  users, req (created by)
+	LinkedTo    *user.User // FK ->  users (nullable)
+	DisplayName string     // req
 	ImageURL    string
 	domain.Auditable
 }
 
-var _ domain.Nullable[Contact] = &Contact{}
-
 func newContact(args CreateArgs) Contact {
-	return Contact{
+	c := Contact{
 		ID: args.ID,
 		User: user.User{
 			ID: args.UserID,
 		},
-		LinkedTo: user.User{
-			ID: args.LinkedToID,
-		},
+		LinkedTo:    nil,
 		DisplayName: args.DisplayName,
 		ImageURL:    "",
 		Auditable: domain.Auditable{
@@ -37,19 +33,24 @@ func newContact(args CreateArgs) Contact {
 			UpdatedAt: time.Now().UTC(),
 		},
 	}
-}
 
-func (c *Contact) PtrIfNotEmpty() *Contact {
-	if c.ID == "" {
-		return nil
+	if args.LinkedToID != "" {
+		c.LinkedTo = &user.User{
+			ID: args.LinkedToID,
+		}
 	}
+
 	return c
 }
 
 func (c *Contact) Update(args UpdateArgs) {
+	if args.LinkedToID == "" {
+		c.LinkedTo = nil
+	} else {
+		c.LinkedTo = &user.User{ID: args.LinkedToID}
+	}
 	c.DisplayName = args.DisplayName
 	c.ImageURL = args.ImageURL
-	c.LinkedTo.ID = args.LinkedToID
 	c.Auditable.Version += 1
 	c.Auditable.UpdatedAt = time.Now().UTC()
 }

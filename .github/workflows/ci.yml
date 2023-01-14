@@ -8,12 +8,14 @@ on:
       - '**.mod'
       - '.github/workflows/**.yml'
       - '.golangci.yml'
+      - 'ent/migrate/migrations/*'
   pull_request:
     branches: [ master ]
     paths:
       - '**.go'
       - '**.mod'
       - '.golangci.yml'
+      - 'ent/migrate/migrations/*'
 
 permissions:
   contents: read

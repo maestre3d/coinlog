@@ -54,6 +54,20 @@ func (cc *ContactCreate) SetDisplayName(s string) *ContactCreate {
 	return cc
 }
 
+// SetLinkedToUser sets the "linked_to_user" field.
+func (cc *ContactCreate) SetLinkedToUser(s string) *ContactCreate {
+	cc.mutation.SetLinkedToUser(s)
+	return cc
+}
+
+// SetNillableLinkedToUser sets the "linked_to_user" field if the given value is not nil.
+func (cc *ContactCreate) SetNillableLinkedToUser(s *string) *ContactCreate {
+	if s != nil {
+		cc.SetLinkedToUser(*s)
+	}
+	return cc
+}
+
 // SetImageURL sets the "image_url" field.
 func (cc *ContactCreate) SetImageURL(s string) *ContactCreate {
 	cc.mutation.SetImageURL(s)
@@ -269,7 +283,7 @@ func (cc *ContactCreate) createSpec() (*Contact, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.user_contact_links = &nodes[0]
+		_node.LinkedToUser = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -375,6 +389,24 @@ func (u *ContactUpsert) SetDisplayName(v string) *ContactUpsert {
 // UpdateDisplayName sets the "display_name" field to the value that was provided on create.
 func (u *ContactUpsert) UpdateDisplayName() *ContactUpsert {
 	u.SetExcluded(contact.FieldDisplayName)
+	return u
+}
+
+// SetLinkedToUser sets the "linked_to_user" field.
+func (u *ContactUpsert) SetLinkedToUser(v string) *ContactUpsert {
+	u.Set(contact.FieldLinkedToUser, v)
+	return u
+}
+
+// UpdateLinkedToUser sets the "linked_to_user" field to the value that was provided on create.
+func (u *ContactUpsert) UpdateLinkedToUser() *ContactUpsert {
+	u.SetExcluded(contact.FieldLinkedToUser)
+	return u
+}
+
+// ClearLinkedToUser clears the value of the "linked_to_user" field.
+func (u *ContactUpsert) ClearLinkedToUser() *ContactUpsert {
+	u.SetNull(contact.FieldLinkedToUser)
 	return u
 }
 
@@ -507,6 +539,27 @@ func (u *ContactUpsertOne) SetDisplayName(v string) *ContactUpsertOne {
 func (u *ContactUpsertOne) UpdateDisplayName() *ContactUpsertOne {
 	return u.Update(func(s *ContactUpsert) {
 		s.UpdateDisplayName()
+	})
+}
+
+// SetLinkedToUser sets the "linked_to_user" field.
+func (u *ContactUpsertOne) SetLinkedToUser(v string) *ContactUpsertOne {
+	return u.Update(func(s *ContactUpsert) {
+		s.SetLinkedToUser(v)
+	})
+}
+
+// UpdateLinkedToUser sets the "linked_to_user" field to the value that was provided on create.
+func (u *ContactUpsertOne) UpdateLinkedToUser() *ContactUpsertOne {
+	return u.Update(func(s *ContactUpsert) {
+		s.UpdateLinkedToUser()
+	})
+}
+
+// ClearLinkedToUser clears the value of the "linked_to_user" field.
+func (u *ContactUpsertOne) ClearLinkedToUser() *ContactUpsertOne {
+	return u.Update(func(s *ContactUpsert) {
+		s.ClearLinkedToUser()
 	})
 }
 
@@ -804,6 +857,27 @@ func (u *ContactUpsertBulk) SetDisplayName(v string) *ContactUpsertBulk {
 func (u *ContactUpsertBulk) UpdateDisplayName() *ContactUpsertBulk {
 	return u.Update(func(s *ContactUpsert) {
 		s.UpdateDisplayName()
+	})
+}
+
+// SetLinkedToUser sets the "linked_to_user" field.
+func (u *ContactUpsertBulk) SetLinkedToUser(v string) *ContactUpsertBulk {
+	return u.Update(func(s *ContactUpsert) {
+		s.SetLinkedToUser(v)
+	})
+}
+
+// UpdateLinkedToUser sets the "linked_to_user" field to the value that was provided on create.
+func (u *ContactUpsertBulk) UpdateLinkedToUser() *ContactUpsertBulk {
+	return u.Update(func(s *ContactUpsert) {
+		s.UpdateLinkedToUser()
+	})
+}
+
+// ClearLinkedToUser clears the value of the "linked_to_user" field.
+func (u *ContactUpsertBulk) ClearLinkedToUser() *ContactUpsertBulk {
+	return u.Update(func(s *ContactUpsert) {
+		s.ClearLinkedToUser()
 	})
 }
 

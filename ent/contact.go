@@ -27,13 +27,14 @@ type Contact struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// DisplayName holds the value of the "display_name" field.
 	DisplayName string `json:"display_name,omitempty"`
+	// LinkedToUser holds the value of the "linked_to_user" field.
+	LinkedToUser string `json:"linked_to_user,omitempty"`
 	// ImageURL holds the value of the "image_url" field.
 	ImageURL string `json:"image_url,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ContactQuery when eager-loading is set.
-	Edges              ContactEdges `json:"edges"`
-	user_contacts      *string
-	user_contact_links *string
+	Edges         ContactEdges `json:"edges"`
+	user_contacts *string
 }
 
 // ContactEdges holds the relations/edges for other nodes in the graph.
@@ -82,13 +83,11 @@ func (*Contact) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case contact.FieldVersion:
 			values[i] = new(sql.NullInt64)
-		case contact.FieldID, contact.FieldDisplayName, contact.FieldImageURL:
+		case contact.FieldID, contact.FieldDisplayName, contact.FieldLinkedToUser, contact.FieldImageURL:
 			values[i] = new(sql.NullString)
 		case contact.FieldCreatedAt, contact.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case contact.ForeignKeys[0]: // user_contacts
-			values[i] = new(sql.NullString)
-		case contact.ForeignKeys[1]: // user_contact_links
 			values[i] = new(sql.NullString)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Contact", columns[i])
@@ -141,6 +140,12 @@ func (c *Contact) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				c.DisplayName = value.String
 			}
+		case contact.FieldLinkedToUser:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field linked_to_user", values[i])
+			} else if value.Valid {
+				c.LinkedToUser = value.String
+			}
 		case contact.FieldImageURL:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field image_url", values[i])
@@ -153,13 +158,6 @@ func (c *Contact) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				c.user_contacts = new(string)
 				*c.user_contacts = value.String
-			}
-		case contact.ForeignKeys[1]:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field user_contact_links", values[i])
-			} else if value.Valid {
-				c.user_contact_links = new(string)
-				*c.user_contact_links = value.String
 			}
 		}
 	}
@@ -213,6 +211,9 @@ func (c *Contact) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("display_name=")
 	builder.WriteString(c.DisplayName)
+	builder.WriteString(", ")
+	builder.WriteString("linked_to_user=")
+	builder.WriteString(c.LinkedToUser)
 	builder.WriteString(", ")
 	builder.WriteString("image_url=")
 	builder.WriteString(c.ImageURL)

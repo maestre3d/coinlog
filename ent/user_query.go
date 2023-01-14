@@ -498,13 +498,10 @@ func (uq *UserQuery) loadContactLinks(ctx context.Context, query *ContactQuery, 
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.user_contact_links
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "user_contact_links" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		fk := n.LinkedToUser
+		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_contact_links" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "linked_to_user" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
