@@ -3,13 +3,15 @@ package sql
 import (
 	"context"
 
-	"github.com/maestre3d/coinlog/domain"
+	"github.com/maestre3d/coinlog/customtype"
 	"github.com/maestre3d/coinlog/domain/contact"
 	"github.com/maestre3d/coinlog/ent"
 	entcontact "github.com/maestre3d/coinlog/ent/contact"
 	"github.com/maestre3d/coinlog/ent/predicate"
 	entuser "github.com/maestre3d/coinlog/ent/user"
 	"github.com/maestre3d/coinlog/parser"
+	"github.com/maestre3d/coinlog/pointer"
+	"github.com/maestre3d/coinlog/storage"
 )
 
 type ContactStorage struct {
@@ -34,10 +36,10 @@ func newContactFromEnt(src *ent.Contact) contact.Contact {
 	return contact.Contact{
 		ID:          src.ID,
 		User:        newUserFromEnt(src.Edges.Owner),
-		LinkedTo:    domain.PtrIfNotEmpty(newUserFromEnt(src.Edges.LinkedTo)),
+		LinkedTo:    pointer.PtrIfNotEmpty(newUserFromEnt(src.Edges.LinkedTo)),
 		DisplayName: src.DisplayName,
 		ImageURL:    src.ImageURL,
-		Auditable: domain.Auditable{
+		Auditable: customtype.Auditable{
 			IsActive:  src.IsActive,
 			Version:   src.Version,
 			CreatedAt: src.CreatedAt,
@@ -113,17 +115,17 @@ func (c ContactStorage) buildQueryFunc(pred ...predicate.Contact) querySQLFunc[*
 	}
 }
 
-func (c ContactStorage) find(ctx context.Context, cr domain.Criteria, pred ...predicate.Contact) ([]contact.Contact,
-	domain.PageToken, error) {
+func (c ContactStorage) find(ctx context.Context, cr storage.Criteria, pred ...predicate.Contact) ([]contact.Contact,
+	storage.PageToken, error) {
 	return paginateSQLFunc(ctx, cr, newContactFromEnt, c.buildQueryFunc(pred...))
 }
 
-func (c ContactStorage) Find(ctx context.Context, cr domain.Criteria) (items []contact.Contact, nextPage domain.PageToken, err error) {
+func (c ContactStorage) Find(ctx context.Context, cr storage.Criteria) (items []contact.Contact, nextPage storage.PageToken, err error) {
 	return c.find(ctx, cr, entcontact.IsActive(true))
 }
 
-func (c ContactStorage) GetUserContacts(ctx context.Context, cr domain.Criteria,
-	userID string) ([]contact.Contact, domain.PageToken, error) {
+func (c ContactStorage) GetUserContacts(ctx context.Context, cr storage.Criteria,
+	userID string) ([]contact.Contact, storage.PageToken, error) {
 	return c.find(ctx, cr, entcontact.And(
 		entcontact.HasOwnerWith(entuser.ID(userID)),
 		entcontact.IsActive(true)),

@@ -3,14 +3,15 @@ package http
 import (
 	"strconv"
 
+	"github.com/maestre3d/coinlog/storage"
+
 	"github.com/labstack/echo/v4"
-	"github.com/maestre3d/coinlog/domain"
 )
 
-func newCriteria(c echo.Context) domain.Criteria {
+func newCriteria(c echo.Context) storage.Criteria {
 	lim, _ := strconv.Atoi(c.QueryParam("limit"))
-	return domain.Criteria{
+	return storage.Criteria{
 		Limit:     lim,
-		PageToken: domain.PageToken(c.QueryParam("page_token")),
+		PageToken: storage.PageToken(c.QueryParam("page_token")),
 	}
 }

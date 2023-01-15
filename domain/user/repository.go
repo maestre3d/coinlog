@@ -1,9 +1,9 @@
 package user
 
 import (
-	"github.com/maestre3d/coinlog/domain"
+	"github.com/maestre3d/coinlog/storage"
 )
 
 type Repository interface {
-	domain.Repository[User]
+	storage.Repository[User]
 }

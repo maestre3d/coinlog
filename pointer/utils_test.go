@@ -1,25 +1,26 @@
-package domain_test
+package pointer_test
 
 import (
 	"testing"
 
-	"github.com/maestre3d/coinlog/domain"
+	"github.com/maestre3d/coinlog/pointer"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestPtrIfNotEmpty(t *testing.T) {
 	// string
-	s := domain.PtrIfNotEmpty("")
+	s := pointer.PtrIfNotEmpty("")
 	assert.Nil(t, s)
-	s = domain.PtrIfNotEmpty("foo")
-	assert.EqualValues(t, domain.PtrTo("foo"), s)
+	s = pointer.PtrIfNotEmpty("foo")
+	assert.EqualValues(t, pointer.PtrTo("foo"), s)
 
 	// int
-	i := domain.PtrIfNotEmpty(0)
+	i := pointer.PtrIfNotEmpty(0)
 	assert.Nil(t, i)
-	i = domain.PtrIfNotEmpty(10)
-	assert.EqualValues(t, domain.PtrTo(10), i)
+	i = pointer.PtrIfNotEmpty(10)
+	assert.EqualValues(t, pointer.PtrTo(10), i)
 }
 
 func TestPtrTo(t *testing.T) {
@@ -31,28 +32,28 @@ func TestPtrTo(t *testing.T) {
 		{
 			name: "empty string",
 			in:   "",
-			exp:  domain.PtrTo(""),
+			exp:  pointer.PtrTo(""),
 		},
 		{
 			name: "empty int",
 			in:   0,
-			exp:  domain.PtrTo(0),
+			exp:  pointer.PtrTo(0),
 		},
 		{
 			name: "string",
 			in:   "foo",
-			exp:  domain.PtrTo("foo"),
+			exp:  pointer.PtrTo("foo"),
 		},
 		{
 			name: "int",
 			in:   10,
-			exp:  domain.PtrTo(10),
+			exp:  pointer.PtrTo(10),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			out := domain.PtrTo(tt.in)
+			out := pointer.PtrTo(tt.in)
 			require.NotNil(t, out)
 			switch v := tt.exp.(type) {
 			case *string:

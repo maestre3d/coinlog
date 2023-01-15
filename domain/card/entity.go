@@ -1,7 +1,7 @@
 package card
 
 import (
-	"github.com/maestre3d/coinlog/domain"
+	"github.com/maestre3d/coinlog/customtype"
 	"github.com/maestre3d/coinlog/domain/financialaccount"
 	"github.com/maestre3d/coinlog/domain/user"
 )
@@ -17,7 +17,7 @@ type Card struct {
 	LastDigits       uint8
 	CardType         TypeCard // enum: credit/debit, req
 	Balance          float64  // nullable
-	domain.Auditable
+	customtype.Auditable
 }
 
 type NewCardArgs struct {

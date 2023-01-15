@@ -5,6 +5,7 @@ import (
 
 	"github.com/maestre3d/coinlog/domain"
 	"github.com/maestre3d/coinlog/parser"
+	"github.com/maestre3d/coinlog/storage"
 )
 
 type Service struct {
@@ -59,7 +60,7 @@ func (s Service) GetByID(ctx context.Context, id string) (View, error) {
 	return NewView(usr), nil
 }
 
-func (s Service) List(ctx context.Context, cr domain.Criteria) ([]View, domain.PageToken, error) {
+func (s Service) List(ctx context.Context, cr storage.Criteria) ([]View, storage.PageToken, error) {
 	cc, nextPage, err := s.repo.Find(ctx, cr)
 	if err != nil {
 		return nil, nil, err
@@ -70,8 +71,8 @@ func (s Service) List(ctx context.Context, cr domain.Criteria) ([]View, domain.P
 	return parser.NewCollection(cc, NewView), nextPage, nil
 }
 
-func (s Service) ListUserContacts(ctx context.Context, cr domain.Criteria, userID string) ([]View,
-	domain.PageToken, error) {
+func (s Service) ListUserContacts(ctx context.Context, cr storage.Criteria, userID string) ([]View,
+	storage.PageToken, error) {
 	cc, nextPage, err := s.repo.GetUserContacts(ctx, cr, userID)
 	if err != nil {
 		return nil, nil, err

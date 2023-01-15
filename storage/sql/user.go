@@ -3,12 +3,13 @@ package sql
 import (
 	"context"
 
-	"github.com/maestre3d/coinlog/domain"
+	"github.com/maestre3d/coinlog/customtype"
 	"github.com/maestre3d/coinlog/domain/user"
 	"github.com/maestre3d/coinlog/ent"
 	"github.com/maestre3d/coinlog/ent/predicate"
 	entuser "github.com/maestre3d/coinlog/ent/user"
 	"github.com/maestre3d/coinlog/parser"
+	"github.com/maestre3d/coinlog/storage"
 )
 
 type UserStorage struct {
@@ -32,7 +33,7 @@ func newUserFromEnt(src *ent.User) user.User {
 	return user.User{
 		ID:          src.ID,
 		DisplayName: src.DisplayName,
-		Auditable: domain.Auditable{
+		Auditable: customtype.Auditable{
 			IsActive:  src.IsActive,
 			Version:   src.Version,
 			CreatedAt: src.CreatedAt,
@@ -76,12 +77,12 @@ func (u UserStorage) buildQueryFunc(pred ...predicate.User) querySQLFunc[*ent.Us
 	}
 }
 
-func (u UserStorage) find(ctx context.Context, cr domain.Criteria, pred ...predicate.User) ([]user.User,
-	domain.PageToken, error) {
+func (u UserStorage) find(ctx context.Context, cr storage.Criteria, pred ...predicate.User) ([]user.User,
+	storage.PageToken, error) {
 	return paginateSQLFunc(ctx, cr, newUserFromEnt, u.buildQueryFunc(pred...))
 }
 
-func (u UserStorage) Find(ctx context.Context, cr domain.Criteria) ([]user.User, domain.PageToken, error) {
+func (u UserStorage) Find(ctx context.Context, cr storage.Criteria) ([]user.User, storage.PageToken, error) {
 	if cr.Limit == 0 {
 		return nil, nil, nil
 	}

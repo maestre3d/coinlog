@@ -1,7 +1,7 @@
 package financialaccount
 
 import (
-	"github.com/maestre3d/coinlog/domain"
+	"github.com/maestre3d/coinlog/customtype"
 	"github.com/maestre3d/coinlog/domain/user"
 )
 
@@ -13,5 +13,5 @@ type FinancialAccount struct {
 	InstitutionName string
 	AccountType     AccountType // enum: checking/savings/...
 	Balance         float64
-	domain.Auditable
+	customtype.Auditable
 }

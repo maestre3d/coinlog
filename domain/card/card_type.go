@@ -1,6 +1,8 @@
 package card
 
-import "github.com/maestre3d/coinlog/domain"
+import (
+	"github.com/maestre3d/coinlog/customtype"
+)
 
 const (
 	typeCardUnknown int = iota
@@ -16,7 +18,7 @@ var typeCardMap = map[int]string{
 
 type TypeCard int
 
-var _ domain.Enum = TypeCard(1)
+var _ customtype.Enum = TypeCard(1)
 
 func (c TypeCard) String() string {
 	return typeCardMap[int(c)]

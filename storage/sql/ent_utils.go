@@ -6,10 +6,10 @@ import (
 
 	"entgo.io/ent/dialect"
 	_ "github.com/lib/pq"
-	"github.com/maestre3d/coinlog/domain"
 	"github.com/maestre3d/coinlog/ent"
 	"github.com/maestre3d/coinlog/ent/migrate"
 	"github.com/maestre3d/coinlog/parser"
+	"github.com/maestre3d/coinlog/storage"
 )
 
 func NewEntClient(cfg Config) (*ent.Client, func(), error) {
@@ -54,16 +54,16 @@ type querySQLFunc[E any] func(ctx context.Context, limit, offset int) ([]E, erro
 // Uses convFunc (parser.ParseFunc).
 //
 // - Builds and encodes next page token (domain.PageToken).
-func paginateSQLFunc[E, T any](ctx context.Context, c domain.Criteria,
-	convFunc parser.ParseFunc[E, T], querySQL querySQLFunc[E]) (items []T, nextPage domain.PageToken, err error) {
+func paginateSQLFunc[E, T any](ctx context.Context, c storage.Criteria,
+	convFunc parser.ParseFunc[E, T], querySQL querySQLFunc[E]) (items []T, nextPage storage.PageToken, err error) {
 
-	pageOffset, _ := strconv.Atoi(domain.DecodePageToken(c.PageToken))
+	pageOffset, _ := strconv.Atoi(storage.DecodePageToken(c.PageToken))
 	defer func() {
 		if pageOffset == -1 {
 			return
 		}
 		pageOffset += len(items)
-		nextPage = domain.NewPageToken(strconv.Itoa(pageOffset))
+		nextPage = storage.NewPageToken(strconv.Itoa(pageOffset))
 	}()
 
 	outList, err := querySQL(ctx, c.Limit, pageOffset)

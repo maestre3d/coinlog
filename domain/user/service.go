@@ -4,12 +4,14 @@ import (
 	"context"
 
 	"github.com/maestre3d/coinlog/domain"
+	"github.com/maestre3d/coinlog/messaging"
 	"github.com/maestre3d/coinlog/parser"
+	"github.com/maestre3d/coinlog/storage"
 )
 
 type Service struct {
 	repo Repository
-	bus  domain.EventBus
+	bus  messaging.Writer
 }
 
 var _ domain.BasicService[View] = Service{}
@@ -61,7 +63,7 @@ func (s Service) GetByID(ctx context.Context, id string) (View, error) {
 	return NewView(usr), nil
 }
 
-func (s Service) List(ctx context.Context, cr domain.Criteria) ([]View, domain.PageToken, error) {
+func (s Service) List(ctx context.Context, cr storage.Criteria) ([]View, storage.PageToken, error) {
 	uu, nextPage, err := s.repo.Find(ctx, cr)
 	if err != nil {
 		return nil, nil, err

@@ -1,8 +1,9 @@
 package contact
 
 import (
-	"github.com/maestre3d/coinlog/domain"
+	"github.com/maestre3d/coinlog/customtype"
 	"github.com/maestre3d/coinlog/domain/user"
+	"github.com/maestre3d/coinlog/pointer"
 )
 
 type View struct {
@@ -11,7 +12,7 @@ type View struct {
 	User        user.View  `json:"user,omitempty"`
 	LinkedTo    *user.View `json:"linked_to"`
 	ImageURL    *string    `json:"image_url"`
-	domain.Auditable
+	customtype.Auditable
 }
 
 func NewView(ctc Contact) View {
@@ -20,8 +21,8 @@ func NewView(ctc Contact) View {
 		DisplayName: ctc.DisplayName,
 		User:        user.NewView(ctc.User),
 		LinkedTo:    nil,
-		ImageURL:    domain.PtrIfNotEmpty(ctc.ImageURL),
-		Auditable: domain.Auditable{
+		ImageURL:    pointer.PtrIfNotEmpty(ctc.ImageURL),
+		Auditable: customtype.Auditable{
 			IsActive:  ctc.Auditable.IsActive,
 			Version:   ctc.Auditable.Version,
 			CreatedAt: ctc.Auditable.CreatedAt,
@@ -29,7 +30,7 @@ func NewView(ctc Contact) View {
 		},
 	}
 	if ctc.LinkedTo != nil {
-		v.LinkedTo = domain.PtrTo(user.NewView(*ctc.LinkedTo))
+		v.LinkedTo = pointer.PtrTo(user.NewView(*ctc.LinkedTo))
 	}
 	return v
 }

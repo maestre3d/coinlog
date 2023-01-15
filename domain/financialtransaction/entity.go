@@ -3,7 +3,8 @@ package financialtransaction
 import (
 	"time"
 
-	"github.com/maestre3d/coinlog/domain"
+	"github.com/maestre3d/coinlog/customtype"
+
 	"github.com/maestre3d/coinlog/domain/card"
 	"github.com/maestre3d/coinlog/domain/contact"
 	"github.com/maestre3d/coinlog/domain/financialaccount"
@@ -28,5 +29,5 @@ type FinancialTransaction struct {
 	Amount               float64
 	Currency             string    // uses ISO-4127 standard
 	OccurredAt           time.Time //req
-	domain.Auditable
+	customtype.Auditable
 }

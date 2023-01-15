@@ -1,20 +1,20 @@
 package user
 
 import (
-	"github.com/maestre3d/coinlog/domain"
+	"github.com/maestre3d/coinlog/customtype"
 )
 
 type View struct {
 	ID          string `json:"id"`
 	DisplayName string `json:"display_name"`
-	domain.Auditable
+	customtype.Auditable
 }
 
 func NewView(usr User) View {
 	return View{
 		ID:          usr.ID,
 		DisplayName: usr.DisplayName,
-		Auditable: domain.Auditable{
+		Auditable: customtype.Auditable{
 			IsActive:  usr.Auditable.IsActive,
 			Version:   usr.Auditable.Version,
 			CreatedAt: usr.Auditable.CreatedAt,

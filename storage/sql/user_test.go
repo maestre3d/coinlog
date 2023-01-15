@@ -8,10 +8,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/maestre3d/coinlog/domain"
+	"github.com/maestre3d/coinlog/customtype"
 	"github.com/maestre3d/coinlog/domain/user"
 	"github.com/maestre3d/coinlog/ent"
 	"github.com/maestre3d/coinlog/identifier"
+	"github.com/maestre3d/coinlog/storage"
 	"github.com/maestre3d/coinlog/storage/sql"
 	"github.com/stretchr/testify/suite"
 )
@@ -58,7 +59,7 @@ func (s *userTestSuite) TestUserStorage_Create() {
 	err := s.repo.Save(context.TODO(), user.User{
 		ID:          id,
 		DisplayName: "foo",
-		Auditable: domain.Auditable{
+		Auditable: customtype.Auditable{
 			IsActive:  true,
 			Version:   1,
 			CreatedAt: time.Now(),
@@ -94,7 +95,7 @@ func (s *userTestSuite) insertRow(uu ...user.User) (ids []string) {
 func (s *userTestSuite) TestUserStorage_Update() {
 	idCreate := s.insertRow(user.User{
 		DisplayName: "bar",
-		Auditable: domain.Auditable{
+		Auditable: customtype.Auditable{
 			IsActive:  true,
 			Version:   1,
 			CreatedAt: time.Now(),
@@ -114,7 +115,7 @@ func (s *userTestSuite) TestUserStorage_Update() {
 				err := s.repo.Save(context.TODO(), user.User{
 					ID:          id,
 					DisplayName: "bar new",
-					Auditable: domain.Auditable{
+					Auditable: customtype.Auditable{
 						IsActive:  true,
 						Version:   1,
 						CreatedAt: time.Now(),
@@ -131,7 +132,7 @@ func (s *userTestSuite) TestUserStorage_Update() {
 				err := s.repo.Save(context.TODO(), user.User{
 					ID:          existingID,
 					DisplayName: "bar v2",
-					Auditable: domain.Auditable{
+					Auditable: customtype.Auditable{
 						IsActive:  true,
 						Version:   2,
 						CreatedAt: time.Now(),
@@ -161,7 +162,7 @@ func (s *userTestSuite) TestUserStorage_Get() {
 	createTime := time.Now().UTC()
 	idCreate := s.insertRow(user.User{
 		DisplayName: "foo",
-		Auditable: domain.Auditable{
+		Auditable: customtype.Auditable{
 			IsActive:  true,
 			Version:   1,
 			CreatedAt: createTime,
@@ -193,7 +194,7 @@ func (s *userTestSuite) TestUserStorage_Get() {
 			want: &user.User{
 				ID:          idCreate[0],
 				DisplayName: "foo",
-				Auditable: domain.Auditable{
+				Auditable: customtype.Auditable{
 					IsActive:  true,
 					Version:   1,
 					CreatedAt: createTime,
@@ -221,7 +222,7 @@ func (s *userTestSuite) TestUserStorage_List() {
 	_ = s.insertRow(
 		user.User{
 			DisplayName: "foo",
-			Auditable: domain.Auditable{
+			Auditable: customtype.Auditable{
 				IsActive:  true,
 				Version:   1,
 				CreatedAt: createTime,
@@ -230,7 +231,7 @@ func (s *userTestSuite) TestUserStorage_List() {
 		},
 		user.User{
 			DisplayName: "bar",
-			Auditable: domain.Auditable{
+			Auditable: customtype.Auditable{
 				IsActive:  true,
 				Version:   1,
 				CreatedAt: createTime,
@@ -240,7 +241,7 @@ func (s *userTestSuite) TestUserStorage_List() {
 
 	tests := []struct {
 		name string
-		in   domain.Criteria
+		in   storage.Criteria
 		exp  int
 		// Token is a hash of a database offset. Moreover, tests are running concurrently and
 		// could cause these tests to deliver false positives and thus fail unexpectedly.
@@ -251,14 +252,14 @@ func (s *userTestSuite) TestUserStorage_List() {
 	}{
 		{
 			name:     "empty",
-			in:       domain.Criteria{},
+			in:       storage.Criteria{},
 			exp:      0,
 			expToken: false,
 			wantErr:  nil,
 		},
 		{
 			name: "exact",
-			in: domain.Criteria{
+			in: storage.Criteria{
 				Limit:     2,
 				PageToken: nil,
 			},
@@ -268,7 +269,7 @@ func (s *userTestSuite) TestUserStorage_List() {
 		},
 		{
 			name: "less",
-			in: domain.Criteria{
+			in: storage.Criteria{
 				Limit:     1,
 				PageToken: nil,
 			},
@@ -278,7 +279,7 @@ func (s *userTestSuite) TestUserStorage_List() {
 		},
 		{
 			name: "more",
-			in: domain.Criteria{
+			in: storage.Criteria{
 				Limit:     100,
 				PageToken: nil,
 			},
@@ -305,7 +306,7 @@ func (s *userTestSuite) TestUserStorage_Delete() {
 	createTime := time.Now().UTC()
 	idCreate := s.insertRow(user.User{
 		DisplayName: "foo",
-		Auditable: domain.Auditable{
+		Auditable: customtype.Auditable{
 			IsActive:  true,
 			Version:   1,
 			CreatedAt: createTime,

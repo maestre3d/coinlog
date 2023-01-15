@@ -3,26 +3,21 @@ package user
 import (
 	"time"
 
-	"github.com/maestre3d/coinlog/domain"
+	"github.com/maestre3d/coinlog/customtype"
 )
 
 // User individual interacting the system.
 type User struct {
 	ID          string
 	DisplayName string // req
-	domain.Auditable
+	customtype.Auditable
 }
 
 func newUser(args CreateCommand) User {
 	return User{
 		ID:          args.ID,
 		DisplayName: args.DisplayName,
-		Auditable: domain.Auditable{
-			IsActive:  true,
-			Version:   1,
-			CreatedAt: time.Now().UTC(),
-			UpdatedAt: time.Now().UTC(),
-		},
+		Auditable:   customtype.NewAuditable(),
 	}
 }
 

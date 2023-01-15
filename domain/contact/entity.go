@@ -3,7 +3,7 @@ package contact
 import (
 	"time"
 
-	"github.com/maestre3d/coinlog/domain"
+	"github.com/maestre3d/coinlog/customtype"
 	"github.com/maestre3d/coinlog/domain/user"
 )
 
@@ -14,7 +14,7 @@ type Contact struct {
 	LinkedTo    *user.User // FK ->  users (nullable)
 	DisplayName string     // req
 	ImageURL    string
-	domain.Auditable
+	customtype.Auditable
 }
 
 func newContact(args CreateCommand) Contact {
@@ -25,13 +25,8 @@ func newContact(args CreateCommand) Contact {
 		},
 		LinkedTo:    nil,
 		DisplayName: args.DisplayName,
-		ImageURL:    "",
-		Auditable: domain.Auditable{
-			IsActive:  true,
-			Version:   1,
-			CreatedAt: time.Now().UTC(),
-			UpdatedAt: time.Now().UTC(),
-		},
+		ImageURL:    args.ImageURL,
+		Auditable:   customtype.NewAuditable(),
 	}
 
 	if args.LinkedToID != "" {

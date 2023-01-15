@@ -1,6 +1,8 @@
 package financialaccount
 
-import "github.com/maestre3d/coinlog/domain"
+import (
+	"github.com/maestre3d/coinlog/customtype"
+)
 
 const (
 	accountTypeUnknown int = iota
@@ -16,7 +18,7 @@ var accountTypeEnumMap = map[int]string{
 
 type AccountType int
 
-var _ domain.Enum = AccountType(1)
+var _ customtype.Enum = AccountType(1)
 
 func (a AccountType) String() string {
 	return accountTypeEnumMap[int(a)]
