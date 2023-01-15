@@ -119,9 +119,9 @@ func echoErrHandler(err error, c echo.Context) {
 		res = transport.ErrorsResponse{
 			Errors: []transport.ErrorResponse{
 				{
-					Code:      echoErr.Code,
-					ErrorType: msg,
-					Message:   msg,
+					Code:        echoErr.Code,
+					ErrorStatus: msg,
+					Message:     msg,
 				},
 			},
 			Code: echoErr.Code,
@@ -170,45 +170,45 @@ func newErrorMessage(err error) transport.ErrorResponse {
 		return newErrorMessage(exception.NewFromValidator(v))
 	case exception.ResourceNotFound:
 		return transport.ErrorResponse{
-			Message:   v.Error(),
-			Code:      http.StatusNotFound,
-			ErrorType: v.TypeName(),
+			Message:     v.Error(),
+			Code:        http.StatusNotFound,
+			ErrorStatus: v.TypeName(),
 		}
-	case exception.DomainUnknown:
+	case exception.DomainGeneric:
 		return transport.ErrorResponse{
-			Message:   v.Error(),
-			Code:      http.StatusBadRequest,
-			ErrorType: v.TypeName(),
+			Message:     v.Error(),
+			Code:        http.StatusBadRequest,
+			ErrorStatus: v.TypeName(),
 		}
 	case exception.MissingParameter:
 		return transport.ErrorResponse{
-			Message:   v.Error(),
-			Code:      http.StatusBadRequest,
-			ErrorType: v.TypeName(),
+			Message:     v.Error(),
+			Code:        http.StatusBadRequest,
+			ErrorStatus: v.TypeName(),
 		}
 	case exception.ParameterOutOfRange:
 		return transport.ErrorResponse{
-			Message:   v.Error(),
-			Code:      http.StatusBadRequest,
-			ErrorType: v.TypeName(),
+			Message:     v.Error(),
+			Code:        http.StatusBadRequest,
+			ErrorStatus: v.TypeName(),
 		}
 	case exception.InvalidParameter:
 		return transport.ErrorResponse{
-			Message:   v.Error(),
-			Code:      http.StatusBadRequest,
-			ErrorType: v.TypeName(),
+			Message:     v.Error(),
+			Code:        http.StatusBadRequest,
+			ErrorStatus: v.TypeName(),
 		}
 	case exception.UnhealthyNode:
 		return transport.ErrorResponse{
-			Code:      http.StatusServiceUnavailable,
-			ErrorType: v.TypeName(),
-			Message:   v.Error(),
+			Code:        http.StatusServiceUnavailable,
+			ErrorStatus: v.TypeName(),
+			Message:     v.Error(),
 		}
 	default:
 		return transport.ErrorResponse{
-			Message:   "error",
-			Code:      http.StatusInternalServerError,
-			ErrorType: http.StatusText(http.StatusInternalServerError),
+			Message:     "error",
+			Code:        http.StatusInternalServerError,
+			ErrorStatus: http.StatusText(http.StatusInternalServerError),
 		}
 	}
 }

@@ -9,3 +9,7 @@ type Exception interface {
 	fmt.Stringer
 	TypeName() string
 }
+
+type Wrapper interface {
+	Unwrap() error
+}

@@ -17,14 +17,15 @@ type ListDataResponse struct {
 	NextPageToken string `json:"next_page_token"`
 }
 
-// ErrorResponse system error template based on RFC 7807 specification (ref: https://www.rfc-editor.org/rfc/rfc7807).
+// ErrorResponse system error template based on RFC 7807 specification (ref: https://www.rfc-editor.org/rfc/rfc7807)
+// and Google Cloud's API Design whitepaper (ref: https://cloud.google.com/apis/design/errors).
 type ErrorResponse struct {
 	// Code HTTP status code.
 	Code int `json:"code"`
-	// ErrorType name of error type cataloged by the system (e.g. ResourceNotFound, MissingParameter).
+	// ErrorStatus name of error type cataloged by the system (e.g. ResourceNotFound, MissingParameter).
 	//
 	// Might be used by external systems to change behaviour at runtime.
-	ErrorType string `json:"error_type"`
+	ErrorStatus string `json:"status"`
 	// Message description or title of error type.
 	Message string `json:"message"`
 }
