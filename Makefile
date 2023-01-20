@@ -15,3 +15,6 @@ gen-ent:
 new-migration:
 	go run -mod=mod ent/migrate/main.go "${MIGRATION_NAME}" && \
 	atlas migrate apply --dir "file://ent/migrate/migrations" --url postgres://postgres:root@localhost:6432/coinlog?sslmode=disable
+
+new-mock:
+	mockery --dir=./domain/user --name=Repository --structname=UserRepository --filename=user_repository.go

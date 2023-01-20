@@ -22,7 +22,7 @@ func NewService(r Repository) Service {
 
 func (s Service) Create(ctx context.Context, args any) error {
 	cmd := args.(CreateCommand)
-	acc, err := NewFinancialAccount(cmd)
+	acc, err := newFinancialAccount(cmd)
 	if err != nil {
 		return err
 	}

@@ -20,7 +20,7 @@ type FinancialAccount struct {
 	customtype.Auditable
 }
 
-func NewFinancialAccount(cmd CreateCommand) (FinancialAccount, error) {
+func newFinancialAccount(cmd CreateCommand) (FinancialAccount, error) {
 	if err := domain.Validate.Struct(cmd); err != nil {
 		return FinancialAccount{}, err
 	}

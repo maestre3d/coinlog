@@ -21,7 +21,8 @@ func newUser(args CreateCommand) User {
 	}
 }
 
-func (u *User) update() {
+func (u *User) update(args UpdateCommand) {
+	u.DisplayName = args.DisplayName
 	u.Version += 1
 	u.UpdatedAt = time.Now().UTC()
 }

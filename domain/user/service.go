@@ -43,15 +43,15 @@ func (s Service) getByID(ctx context.Context, id string) (User, error) {
 }
 
 func (s Service) Update(ctx context.Context, args any) error {
-	a := args.(UpdateCommand)
-	if err := domain.Validate.Struct(a); err != nil {
+	cmd := args.(UpdateCommand)
+	if err := domain.Validate.Struct(cmd); err != nil {
 		return err
 	}
-	usr, err := s.getByID(ctx, a.ID)
+	usr, err := s.getByID(ctx, cmd.ID)
 	if err != nil {
 		return err
 	}
-	usr.update()
+	usr.update(cmd)
 	return s.repo.Save(ctx, usr)
 }
 
