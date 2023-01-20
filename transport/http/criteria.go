@@ -8,13 +8,14 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func newCriteria(c echo.Context) storage.Criteria {
-	lim, _ := strconv.Atoi(c.QueryParam("limit"))
-	if lim == 0 {
-		lim = 10
+func newCriteria(c echo.Context) (out storage.Criteria) {
+	out.Limit, _ = strconv.Atoi(c.QueryParam("limit"))
+	if out.Limit <= 0 {
+		out.Limit = 10
 	}
-	return storage.Criteria{
-		Limit:     lim,
-		PageToken: storage.PageToken(c.QueryParam("page_token")),
+
+	if token := c.QueryParam("page_token"); token != "" {
+		out.PageToken = storage.NewPageToken(token)
 	}
+	return
 }

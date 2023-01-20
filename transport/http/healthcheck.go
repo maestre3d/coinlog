@@ -17,10 +17,12 @@ func NewHealthcheckController() HealthcheckController {
 }
 
 func (l HealthcheckController) MapRoutes(e *echo.Echo) {
-	e.GET("/health", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, transport.BasicResponse{
-			Message: http.StatusText(http.StatusOK),
-		})
+	e.GET("/health", l.checkLive)
+}
+
+func (l HealthcheckController) checkLive(c echo.Context) error {
+	return c.JSON(http.StatusOK, transport.BasicResponse{
+		Message: http.StatusText(http.StatusOK),
 	})
 }
 

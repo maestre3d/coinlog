@@ -30,7 +30,6 @@ func NewFinancialAccount(cmd CreateCommand) (FinancialAccount, error) {
 		return FinancialAccount{}, err
 	}
 
-	createTime := time.Now().UTC()
 	return FinancialAccount{
 		ID: cmd.AccountID,
 		User: user.User{
@@ -41,12 +40,7 @@ func NewFinancialAccount(cmd CreateCommand) (FinancialAccount, error) {
 		AccountType:  accType,
 		Balance:      cmd.Balance,
 		CurrencyCode: cmd.CurrencyCode,
-		Auditable: customtype.Auditable{
-			IsActive:  true,
-			Version:   1,
-			CreatedAt: createTime,
-			UpdatedAt: createTime,
-		},
+		Auditable:    customtype.NewAuditable(),
 	}, nil
 }
 

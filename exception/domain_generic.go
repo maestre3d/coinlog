@@ -6,6 +6,8 @@ type DomainGeneric struct {
 
 var _ Exception = DomainGeneric{}
 
+var _ Wrapper = DomainGeneric{}
+
 func (e DomainGeneric) Error() string {
 	return e.Parent.Error()
 }
@@ -16,4 +18,8 @@ func (e DomainGeneric) String() string {
 
 func (e DomainGeneric) TypeName() string {
 	return newExceptionTypeName(e)
+}
+
+func (e DomainGeneric) Unwrap() error {
+	return e.Parent
 }

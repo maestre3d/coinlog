@@ -48,4 +48,8 @@ func TestNewPageToken(t *testing.T) {
 			assert.Equal(t, tt.in, storage.DecodePageToken(out))
 		})
 	}
+
+	// test arbitrary
+	out := storage.DecodePageToken(storage.PageToken("foo"))
+	assert.Equal(t, "", out)
 }

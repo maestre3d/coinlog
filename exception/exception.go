@@ -10,6 +10,8 @@ type Exception interface {
 	TypeName() string
 }
 
+// Wrapper custom Exception type with parent error capabilities.
 type Wrapper interface {
+	// Unwrap retrieves parent error.
 	Unwrap() error
 }
