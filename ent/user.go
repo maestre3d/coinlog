@@ -37,9 +37,11 @@ type UserEdges struct {
 	Contacts []*Contact `json:"contacts,omitempty"`
 	// ContactLinks holds the value of the contact_links edge.
 	ContactLinks []*Contact `json:"contact_links,omitempty"`
+	// FinancialAccounts holds the value of the financial_accounts edge.
+	FinancialAccounts []*FinancialAccount `json:"financial_accounts,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // ContactsOrErr returns the Contacts value or an error if the edge
@@ -58,6 +60,15 @@ func (e UserEdges) ContactLinksOrErr() ([]*Contact, error) {
 		return e.ContactLinks, nil
 	}
 	return nil, &NotLoadedError{edge: "contact_links"}
+}
+
+// FinancialAccountsOrErr returns the FinancialAccounts value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) FinancialAccountsOrErr() ([]*FinancialAccount, error) {
+	if e.loadedTypes[2] {
+		return e.FinancialAccounts, nil
+	}
+	return nil, &NotLoadedError{edge: "financial_accounts"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -137,6 +148,11 @@ func (u *User) QueryContacts() *ContactQuery {
 // QueryContactLinks queries the "contact_links" edge of the User entity.
 func (u *User) QueryContactLinks() *ContactQuery {
 	return (&UserClient{config: u.config}).QueryContactLinks(u)
+}
+
+// QueryFinancialAccounts queries the "financial_accounts" edge of the User entity.
+func (u *User) QueryFinancialAccounts() *FinancialAccountQuery {
+	return (&UserClient{config: u.config}).QueryFinancialAccounts(u)
 }
 
 // Update returns a builder for updating this User.

@@ -6,7 +6,7 @@ import (
 	"github.com/maestre3d/coinlog/customtype"
 	"github.com/maestre3d/coinlog/domain/contact"
 	"github.com/maestre3d/coinlog/ent"
-	entcontact "github.com/maestre3d/coinlog/ent/contact"
+	entschema "github.com/maestre3d/coinlog/ent/contact"
 	"github.com/maestre3d/coinlog/ent/predicate"
 	entuser "github.com/maestre3d/coinlog/ent/user"
 	"github.com/maestre3d/coinlog/parser"
@@ -67,9 +67,8 @@ func (c ContactStorage) create(ctx context.Context, v contact.Contact) error {
 
 func (c ContactStorage) update(ctx context.Context, v contact.Contact) error {
 	stmt := c.db.Contact.Update().
-		Where(entcontact.IDEQ(v.ID)).
+		Where(entschema.IDEQ(v.ID)).
 		SetDisplayName(v.DisplayName).
-		SetOwnerID(v.User.ID).
 		SetImageURL(v.ImageURL).
 		SetIsActive(v.Auditable.IsActive).
 		SetVersion(v.Auditable.Version).
@@ -92,7 +91,7 @@ func (c ContactStorage) Save(ctx context.Context, v contact.Contact) error {
 }
 
 func (c ContactStorage) Get(ctx context.Context, id string) (*contact.Contact, error) {
-	out, err := c.db.Contact.Query().Where(entcontact.ID(id)).WithOwner().WithLinkedTo().Only(ctx)
+	out, err := c.db.Contact.Query().Where(entschema.ID(id)).WithOwner().WithLinkedTo().Only(ctx)
 	if err != nil && ent.IsNotFound(err) {
 		return nil, nil
 	} else if err != nil {
@@ -121,14 +120,14 @@ func (c ContactStorage) find(ctx context.Context, cr storage.Criteria, pred ...p
 }
 
 func (c ContactStorage) Find(ctx context.Context, cr storage.Criteria) (items []contact.Contact, nextPage storage.PageToken, err error) {
-	return c.find(ctx, cr, entcontact.IsActive(true))
+	return c.find(ctx, cr, entschema.IsActive(true))
 }
 
 func (c ContactStorage) GetUserContacts(ctx context.Context, cr storage.Criteria,
 	userID string) ([]contact.Contact, storage.PageToken, error) {
-	return c.find(ctx, cr, entcontact.And(
-		entcontact.HasOwnerWith(entuser.ID(userID)),
-		entcontact.IsActive(true)),
+	return c.find(ctx, cr, entschema.And(
+		entschema.HasOwnerWith(entuser.ID(userID)),
+		entschema.IsActive(true)),
 	)
 }
 

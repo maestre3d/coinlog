@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/maestre3d/coinlog/ent/contact"
+	"github.com/maestre3d/coinlog/ent/financialaccount"
 	"github.com/maestre3d/coinlog/ent/predicate"
 	"github.com/maestre3d/coinlog/ent/user"
 )
@@ -19,15 +20,16 @@ import (
 // UserQuery is the builder for querying User entities.
 type UserQuery struct {
 	config
-	limit            *int
-	offset           *int
-	unique           *bool
-	order            []OrderFunc
-	fields           []string
-	inters           []Interceptor
-	predicates       []predicate.User
-	withContacts     *ContactQuery
-	withContactLinks *ContactQuery
+	limit                 *int
+	offset                *int
+	unique                *bool
+	order                 []OrderFunc
+	fields                []string
+	inters                []Interceptor
+	predicates            []predicate.User
+	withContacts          *ContactQuery
+	withContactLinks      *ContactQuery
+	withFinancialAccounts *FinancialAccountQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -101,6 +103,28 @@ func (uq *UserQuery) QueryContactLinks() *ContactQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(contact.Table, contact.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.ContactLinksTable, user.ContactLinksColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryFinancialAccounts chains the current query on the "financial_accounts" edge.
+func (uq *UserQuery) QueryFinancialAccounts() *FinancialAccountQuery {
+	query := (&FinancialAccountClient{config: uq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(financialaccount.Table, financialaccount.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.FinancialAccountsTable, user.FinancialAccountsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -293,14 +317,15 @@ func (uq *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:           uq.config,
-		limit:            uq.limit,
-		offset:           uq.offset,
-		order:            append([]OrderFunc{}, uq.order...),
-		inters:           append([]Interceptor{}, uq.inters...),
-		predicates:       append([]predicate.User{}, uq.predicates...),
-		withContacts:     uq.withContacts.Clone(),
-		withContactLinks: uq.withContactLinks.Clone(),
+		config:                uq.config,
+		limit:                 uq.limit,
+		offset:                uq.offset,
+		order:                 append([]OrderFunc{}, uq.order...),
+		inters:                append([]Interceptor{}, uq.inters...),
+		predicates:            append([]predicate.User{}, uq.predicates...),
+		withContacts:          uq.withContacts.Clone(),
+		withContactLinks:      uq.withContactLinks.Clone(),
+		withFinancialAccounts: uq.withFinancialAccounts.Clone(),
 		// clone intermediate query.
 		sql:    uq.sql.Clone(),
 		path:   uq.path,
@@ -327,6 +352,17 @@ func (uq *UserQuery) WithContactLinks(opts ...func(*ContactQuery)) *UserQuery {
 		opt(query)
 	}
 	uq.withContactLinks = query
+	return uq
+}
+
+// WithFinancialAccounts tells the query-builder to eager-load the nodes that are connected to
+// the "financial_accounts" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithFinancialAccounts(opts ...func(*FinancialAccountQuery)) *UserQuery {
+	query := (&FinancialAccountClient{config: uq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withFinancialAccounts = query
 	return uq
 }
 
@@ -408,9 +444,10 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			uq.withContacts != nil,
 			uq.withContactLinks != nil,
+			uq.withFinancialAccounts != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -442,6 +479,13 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := uq.loadContactLinks(ctx, query, nodes,
 			func(n *User) { n.Edges.ContactLinks = []*Contact{} },
 			func(n *User, e *Contact) { n.Edges.ContactLinks = append(n.Edges.ContactLinks, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := uq.withFinancialAccounts; query != nil {
+		if err := uq.loadFinancialAccounts(ctx, query, nodes,
+			func(n *User) { n.Edges.FinancialAccounts = []*FinancialAccount{} },
+			func(n *User, e *FinancialAccount) { n.Edges.FinancialAccounts = append(n.Edges.FinancialAccounts, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -502,6 +546,37 @@ func (uq *UserQuery) loadContactLinks(ctx context.Context, query *ContactQuery, 
 		node, ok := nodeids[fk]
 		if !ok {
 			return fmt.Errorf(`unexpected foreign-key "linked_to_user" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (uq *UserQuery) loadFinancialAccounts(ctx context.Context, query *FinancialAccountQuery, nodes []*User, init func(*User), assign func(*User, *FinancialAccount)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.FinancialAccount(func(s *sql.Selector) {
+		s.Where(sql.InValues(user.FinancialAccountsColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.user_financial_accounts
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "user_financial_accounts" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_financial_accounts" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

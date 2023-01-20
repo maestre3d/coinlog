@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/maestre3d/coinlog/ent/contact"
+	"github.com/maestre3d/coinlog/ent/financialaccount"
 	"github.com/maestre3d/coinlog/ent/predicate"
 	"github.com/maestre3d/coinlog/ent/user"
 )
@@ -90,6 +91,21 @@ func (uu *UserUpdate) AddContactLinks(c ...*Contact) *UserUpdate {
 	return uu.AddContactLinkIDs(ids...)
 }
 
+// AddFinancialAccountIDs adds the "financial_accounts" edge to the FinancialAccount entity by IDs.
+func (uu *UserUpdate) AddFinancialAccountIDs(ids ...string) *UserUpdate {
+	uu.mutation.AddFinancialAccountIDs(ids...)
+	return uu
+}
+
+// AddFinancialAccounts adds the "financial_accounts" edges to the FinancialAccount entity.
+func (uu *UserUpdate) AddFinancialAccounts(f ...*FinancialAccount) *UserUpdate {
+	ids := make([]string, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return uu.AddFinancialAccountIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
@@ -135,6 +151,27 @@ func (uu *UserUpdate) RemoveContactLinks(c ...*Contact) *UserUpdate {
 		ids[i] = c[i].ID
 	}
 	return uu.RemoveContactLinkIDs(ids...)
+}
+
+// ClearFinancialAccounts clears all "financial_accounts" edges to the FinancialAccount entity.
+func (uu *UserUpdate) ClearFinancialAccounts() *UserUpdate {
+	uu.mutation.ClearFinancialAccounts()
+	return uu
+}
+
+// RemoveFinancialAccountIDs removes the "financial_accounts" edge to FinancialAccount entities by IDs.
+func (uu *UserUpdate) RemoveFinancialAccountIDs(ids ...string) *UserUpdate {
+	uu.mutation.RemoveFinancialAccountIDs(ids...)
+	return uu
+}
+
+// RemoveFinancialAccounts removes "financial_accounts" edges to FinancialAccount entities.
+func (uu *UserUpdate) RemoveFinancialAccounts(f ...*FinancialAccount) *UserUpdate {
+	ids := make([]string, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return uu.RemoveFinancialAccountIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -318,6 +355,60 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if uu.mutation.FinancialAccountsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.FinancialAccountsTable,
+			Columns: []string{user.FinancialAccountsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: financialaccount.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedFinancialAccountsIDs(); len(nodes) > 0 && !uu.mutation.FinancialAccountsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.FinancialAccountsTable,
+			Columns: []string{user.FinancialAccountsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: financialaccount.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.FinancialAccountsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.FinancialAccountsTable,
+			Columns: []string{user.FinancialAccountsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: financialaccount.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
@@ -399,6 +490,21 @@ func (uuo *UserUpdateOne) AddContactLinks(c ...*Contact) *UserUpdateOne {
 	return uuo.AddContactLinkIDs(ids...)
 }
 
+// AddFinancialAccountIDs adds the "financial_accounts" edge to the FinancialAccount entity by IDs.
+func (uuo *UserUpdateOne) AddFinancialAccountIDs(ids ...string) *UserUpdateOne {
+	uuo.mutation.AddFinancialAccountIDs(ids...)
+	return uuo
+}
+
+// AddFinancialAccounts adds the "financial_accounts" edges to the FinancialAccount entity.
+func (uuo *UserUpdateOne) AddFinancialAccounts(f ...*FinancialAccount) *UserUpdateOne {
+	ids := make([]string, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return uuo.AddFinancialAccountIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
@@ -444,6 +550,27 @@ func (uuo *UserUpdateOne) RemoveContactLinks(c ...*Contact) *UserUpdateOne {
 		ids[i] = c[i].ID
 	}
 	return uuo.RemoveContactLinkIDs(ids...)
+}
+
+// ClearFinancialAccounts clears all "financial_accounts" edges to the FinancialAccount entity.
+func (uuo *UserUpdateOne) ClearFinancialAccounts() *UserUpdateOne {
+	uuo.mutation.ClearFinancialAccounts()
+	return uuo
+}
+
+// RemoveFinancialAccountIDs removes the "financial_accounts" edge to FinancialAccount entities by IDs.
+func (uuo *UserUpdateOne) RemoveFinancialAccountIDs(ids ...string) *UserUpdateOne {
+	uuo.mutation.RemoveFinancialAccountIDs(ids...)
+	return uuo
+}
+
+// RemoveFinancialAccounts removes "financial_accounts" edges to FinancialAccount entities.
+func (uuo *UserUpdateOne) RemoveFinancialAccounts(f ...*FinancialAccount) *UserUpdateOne {
+	ids := make([]string, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return uuo.RemoveFinancialAccountIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -643,6 +770,60 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeString,
 					Column: contact.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.FinancialAccountsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.FinancialAccountsTable,
+			Columns: []string{user.FinancialAccountsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: financialaccount.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedFinancialAccountsIDs(); len(nodes) > 0 && !uuo.mutation.FinancialAccountsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.FinancialAccountsTable,
+			Columns: []string{user.FinancialAccountsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: financialaccount.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.FinancialAccountsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.FinancialAccountsTable,
+			Columns: []string{user.FinancialAccountsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: financialaccount.FieldID,
 				},
 			},
 		}

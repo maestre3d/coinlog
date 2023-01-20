@@ -21,6 +21,8 @@ const (
 	EdgeContacts = "contacts"
 	// EdgeContactLinks holds the string denoting the contact_links edge name in mutations.
 	EdgeContactLinks = "contact_links"
+	// EdgeFinancialAccounts holds the string denoting the financial_accounts edge name in mutations.
+	EdgeFinancialAccounts = "financial_accounts"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// ContactsTable is the table that holds the contacts relation/edge.
@@ -37,6 +39,13 @@ const (
 	ContactLinksInverseTable = "contacts"
 	// ContactLinksColumn is the table column denoting the contact_links relation/edge.
 	ContactLinksColumn = "linked_to_user"
+	// FinancialAccountsTable is the table that holds the financial_accounts relation/edge.
+	FinancialAccountsTable = "financial_accounts"
+	// FinancialAccountsInverseTable is the table name for the FinancialAccount entity.
+	// It exists in this package in order to avoid circular dependency with the "financialaccount" package.
+	FinancialAccountsInverseTable = "financial_accounts"
+	// FinancialAccountsColumn is the table column denoting the financial_accounts relation/edge.
+	FinancialAccountsColumn = "user_financial_accounts"
 )
 
 // Columns holds all SQL columns for user fields.

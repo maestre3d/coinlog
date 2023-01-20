@@ -10,13 +10,14 @@ import (
 // a FinancialAccount or credit line.
 type Card struct {
 	ID               string
-	User             user.User                         // req, FK -> users
-	FinancialAccount financialaccount.FinancialAccount // FK -> financial_accounts (nullable on credit cards)
-	DisplayName      string                            // req
-	InstitutionName  string
+	User             user.User                          // req, FK -> users
+	FinancialAccount *financialaccount.FinancialAccount // FK -> financial_accounts (nullable on credit cards)
+	DisplayName      string                             // req
+	BankName         string
 	LastDigits       uint8
 	CardType         TypeCard // enum: credit/debit, req
 	Balance          float64  // nullable
+	CurrencyCode     string
 	customtype.Auditable
 }
 

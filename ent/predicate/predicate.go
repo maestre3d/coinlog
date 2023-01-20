@@ -9,5 +9,8 @@ import (
 // Contact is the predicate function for contact builders.
 type Contact func(*sql.Selector)
 
+// FinancialAccount is the predicate function for financialaccount builders.
+type FinancialAccount func(*sql.Selector)
+
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

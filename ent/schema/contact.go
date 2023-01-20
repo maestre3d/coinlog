@@ -40,26 +40,15 @@ func (Contact) Edges() []ent.Edge {
 		edge.From("owner", User.Type).
 			Ref("contacts").
 			Unique().
-			Required(),
+			Required().
+			Immutable(),
 		edge.From("linked_to", User.Type).
 			Ref("contact_links").
 			Unique().
 			Field("linked_to_user").
 			Annotations(
 				entsql.Annotation{
-					Table:        "",
-					Charset:      "",
-					Collation:    "",
-					Default:      "",
-					DefaultExpr:  "",
-					DefaultExprs: nil,
-					Options:      "",
-					Size:         0,
-					WithComments: nil,
-					Incremental:  nil,
-					OnDelete:     entsql.SetNull,
-					Check:        "",
-					Checks:       nil,
+					OnDelete: entsql.SetNull,
 				}),
 	}
 }

@@ -40,6 +40,34 @@ var (
 			},
 		},
 	}
+	// FinancialAccountsColumns holds the columns for the "financial_accounts" table.
+	FinancialAccountsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true},
+		{Name: "is_active", Type: field.TypeBool},
+		{Name: "version", Type: field.TypeUint32},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "display_name", Type: field.TypeString},
+		{Name: "bank_name", Type: field.TypeString, Nullable: true},
+		{Name: "account_type", Type: field.TypeString},
+		{Name: "balance", Type: field.TypeFloat64},
+		{Name: "currency_code", Type: field.TypeString},
+		{Name: "user_financial_accounts", Type: field.TypeString},
+	}
+	// FinancialAccountsTable holds the schema information for the "financial_accounts" table.
+	FinancialAccountsTable = &schema.Table{
+		Name:       "financial_accounts",
+		Columns:    FinancialAccountsColumns,
+		PrimaryKey: []*schema.Column{FinancialAccountsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "financial_accounts_users_financial_accounts",
+				Columns:    []*schema.Column{FinancialAccountsColumns[10]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true},
@@ -58,6 +86,7 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		ContactsTable,
+		FinancialAccountsTable,
 		UsersTable,
 	}
 )
@@ -65,4 +94,5 @@ var (
 func init() {
 	ContactsTable.ForeignKeys[0].RefTable = UsersTable
 	ContactsTable.ForeignKeys[1].RefTable = UsersTable
+	FinancialAccountsTable.ForeignKeys[0].RefTable = UsersTable
 }

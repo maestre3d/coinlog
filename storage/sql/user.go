@@ -7,7 +7,7 @@ import (
 	"github.com/maestre3d/coinlog/domain/user"
 	"github.com/maestre3d/coinlog/ent"
 	"github.com/maestre3d/coinlog/ent/predicate"
-	entuser "github.com/maestre3d/coinlog/ent/user"
+	entschema "github.com/maestre3d/coinlog/ent/user"
 	"github.com/maestre3d/coinlog/parser"
 	"github.com/maestre3d/coinlog/storage"
 )
@@ -50,7 +50,7 @@ func (u UserStorage) Save(ctx context.Context, v user.User) error {
 		SetVersion(v.Auditable.Version).
 		SetCreatedAt(v.Auditable.CreatedAt).
 		SetUpdatedAt(v.Auditable.UpdatedAt).
-		OnConflictColumns(entuser.FieldID).
+		OnConflictColumns(entschema.FieldID).
 		UpdateNewValues().
 		Exec(ctx)
 }
@@ -86,7 +86,7 @@ func (u UserStorage) Find(ctx context.Context, cr storage.Criteria) ([]user.User
 	if cr.Limit == 0 {
 		return nil, nil, nil
 	}
-	return u.find(ctx, cr, entuser.IsActive(true))
+	return u.find(ctx, cr, entschema.IsActive(true))
 }
 
 func (u UserStorage) Remove(ctx context.Context, id string) error {

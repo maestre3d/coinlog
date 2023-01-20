@@ -4,6 +4,7 @@ package ent
 
 import (
 	"github.com/maestre3d/coinlog/ent/contact"
+	"github.com/maestre3d/coinlog/ent/financialaccount"
 	"github.com/maestre3d/coinlog/ent/schema"
 	"github.com/maestre3d/coinlog/ent/user"
 )
@@ -22,6 +23,24 @@ func init() {
 	contactDescID := contactFields[0].Descriptor()
 	// contact.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	contact.IDValidator = contactDescID.Validators[0].(func(string) error)
+	financialaccountFields := schema.FinancialAccount{}.Fields()
+	_ = financialaccountFields
+	// financialaccountDescDisplayName is the schema descriptor for display_name field.
+	financialaccountDescDisplayName := financialaccountFields[1].Descriptor()
+	// financialaccount.DisplayNameValidator is a validator for the "display_name" field. It is called by the builders before save.
+	financialaccount.DisplayNameValidator = financialaccountDescDisplayName.Validators[0].(func(string) error)
+	// financialaccountDescAccountType is the schema descriptor for account_type field.
+	financialaccountDescAccountType := financialaccountFields[3].Descriptor()
+	// financialaccount.AccountTypeValidator is a validator for the "account_type" field. It is called by the builders before save.
+	financialaccount.AccountTypeValidator = financialaccountDescAccountType.Validators[0].(func(string) error)
+	// financialaccountDescCurrencyCode is the schema descriptor for currency_code field.
+	financialaccountDescCurrencyCode := financialaccountFields[5].Descriptor()
+	// financialaccount.CurrencyCodeValidator is a validator for the "currency_code" field. It is called by the builders before save.
+	financialaccount.CurrencyCodeValidator = financialaccountDescCurrencyCode.Validators[0].(func(string) error)
+	// financialaccountDescID is the schema descriptor for id field.
+	financialaccountDescID := financialaccountFields[0].Descriptor()
+	// financialaccount.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	financialaccount.IDValidator = financialaccountDescID.Validators[0].(func(string) error)
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescDisplayName is the schema descriptor for display_name field.

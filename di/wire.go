@@ -6,6 +6,7 @@ import (
 	"github.com/google/wire"
 	"github.com/maestre3d/coinlog"
 	"github.com/maestre3d/coinlog/domain/contact"
+	"github.com/maestre3d/coinlog/domain/financialaccount"
 	"github.com/maestre3d/coinlog/domain/user"
 	"github.com/maestre3d/coinlog/storage/sql"
 	"github.com/maestre3d/coinlog/transport/http"
@@ -32,12 +33,20 @@ var contactSet = wire.NewSet(
 	http.NewContactController,
 )
 
+var finAccountSet = wire.NewSet(
+	wire.Bind(new(financialaccount.Repository), new(sql.FinancialAccountStorage)),
+	sql.NewFinancialAccountStorage,
+	financialaccount.NewService,
+	http.NewFinancialController,
+)
+
 // Holds all controllers for HTTP protocol, wire auto-binds inner deps.
 type httpCtrl struct {
 	//Liveness controller.LivenessHTTP
 	Healthcheck http.HealthcheckController
 	User        http.UserController
 	Contact     http.ContactController
+	FinAccount  http.FinancialAccountController
 }
 
 func provideHttpRoutes(cfg coinlogHTTPConfig, ctrls httpCtrl) *http.ControllerMapper {
@@ -45,7 +54,12 @@ func provideHttpRoutes(cfg coinlogHTTPConfig, ctrls httpCtrl) *http.ControllerMa
 	// Add desired controllers here in single liner -method accepts variadic-.
 	//
 	// e.g. mux.Add(ctrls.Report, ctrls.Foo, ctrls.Bar)
-	mapper.Add(ctrls.Healthcheck, ctrls.User, ctrls.Contact)
+	mapper.Add(
+		ctrls.Healthcheck,
+		ctrls.User,
+		ctrls.Contact,
+		ctrls.FinAccount,
+	)
 	return mapper
 }
 
@@ -55,6 +69,7 @@ func NewCoinlogHTTP() (*CoinlogHTTP, func(), error) {
 		sql.NewEntClient,
 		userSet,
 		contactSet,
+		finAccountSet,
 		http.NewHealthcheckController,
 		wire.Struct(new(httpCtrl), "*"),
 		provideHttpRoutes,

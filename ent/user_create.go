@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/maestre3d/coinlog/ent/contact"
+	"github.com/maestre3d/coinlog/ent/financialaccount"
 	"github.com/maestre3d/coinlog/ent/user"
 )
 
@@ -88,6 +89,21 @@ func (uc *UserCreate) AddContactLinks(c ...*Contact) *UserCreate {
 		ids[i] = c[i].ID
 	}
 	return uc.AddContactLinkIDs(ids...)
+}
+
+// AddFinancialAccountIDs adds the "financial_accounts" edge to the FinancialAccount entity by IDs.
+func (uc *UserCreate) AddFinancialAccountIDs(ids ...string) *UserCreate {
+	uc.mutation.AddFinancialAccountIDs(ids...)
+	return uc
+}
+
+// AddFinancialAccounts adds the "financial_accounts" edges to the FinancialAccount entity.
+func (uc *UserCreate) AddFinancialAccounts(f ...*FinancialAccount) *UserCreate {
+	ids := make([]string, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return uc.AddFinancialAccountIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -241,6 +257,25 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeString,
 					Column: contact.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.FinancialAccountsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.FinancialAccountsTable,
+			Columns: []string{user.FinancialAccountsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: financialaccount.FieldID,
 				},
 			},
 		}

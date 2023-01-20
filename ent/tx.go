@@ -14,6 +14,8 @@ type Tx struct {
 	config
 	// Contact is the client for interacting with the Contact builders.
 	Contact *ContactClient
+	// FinancialAccount is the client for interacting with the FinancialAccount builders.
+	FinancialAccount *FinancialAccountClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 
@@ -148,6 +150,7 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Contact = NewContactClient(tx.config)
+	tx.FinancialAccount = NewFinancialAccountClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }
 

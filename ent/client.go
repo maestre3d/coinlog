@@ -11,6 +11,7 @@ import (
 	"github.com/maestre3d/coinlog/ent/migrate"
 
 	"github.com/maestre3d/coinlog/ent/contact"
+	"github.com/maestre3d/coinlog/ent/financialaccount"
 	"github.com/maestre3d/coinlog/ent/user"
 
 	"entgo.io/ent/dialect"
@@ -25,6 +26,8 @@ type Client struct {
 	Schema *migrate.Schema
 	// Contact is the client for interacting with the Contact builders.
 	Contact *ContactClient
+	// FinancialAccount is the client for interacting with the FinancialAccount builders.
+	FinancialAccount *FinancialAccountClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 }
@@ -41,6 +44,7 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Contact = NewContactClient(c.config)
+	c.FinancialAccount = NewFinancialAccountClient(c.config)
 	c.User = NewUserClient(c.config)
 }
 
@@ -73,10 +77,11 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:     ctx,
-		config:  cfg,
-		Contact: NewContactClient(cfg),
-		User:    NewUserClient(cfg),
+		ctx:              ctx,
+		config:           cfg,
+		Contact:          NewContactClient(cfg),
+		FinancialAccount: NewFinancialAccountClient(cfg),
+		User:             NewUserClient(cfg),
 	}, nil
 }
 
@@ -94,10 +99,11 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:     ctx,
-		config:  cfg,
-		Contact: NewContactClient(cfg),
-		User:    NewUserClient(cfg),
+		ctx:              ctx,
+		config:           cfg,
+		Contact:          NewContactClient(cfg),
+		FinancialAccount: NewFinancialAccountClient(cfg),
+		User:             NewUserClient(cfg),
 	}, nil
 }
 
@@ -127,6 +133,7 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	c.Contact.Use(hooks...)
+	c.FinancialAccount.Use(hooks...)
 	c.User.Use(hooks...)
 }
 
@@ -134,6 +141,7 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	c.Contact.Intercept(interceptors...)
+	c.FinancialAccount.Intercept(interceptors...)
 	c.User.Intercept(interceptors...)
 }
 
@@ -142,6 +150,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *ContactMutation:
 		return c.Contact.mutate(ctx, m)
+	case *FinancialAccountMutation:
+		return c.FinancialAccount.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
 	default:
@@ -298,6 +308,139 @@ func (c *ContactClient) mutate(ctx context.Context, m *ContactMutation) (Value, 
 	}
 }
 
+// FinancialAccountClient is a client for the FinancialAccount schema.
+type FinancialAccountClient struct {
+	config
+}
+
+// NewFinancialAccountClient returns a client for the FinancialAccount from the given config.
+func NewFinancialAccountClient(c config) *FinancialAccountClient {
+	return &FinancialAccountClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `financialaccount.Hooks(f(g(h())))`.
+func (c *FinancialAccountClient) Use(hooks ...Hook) {
+	c.hooks.FinancialAccount = append(c.hooks.FinancialAccount, hooks...)
+}
+
+// Use adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `financialaccount.Intercept(f(g(h())))`.
+func (c *FinancialAccountClient) Intercept(interceptors ...Interceptor) {
+	c.inters.FinancialAccount = append(c.inters.FinancialAccount, interceptors...)
+}
+
+// Create returns a builder for creating a FinancialAccount entity.
+func (c *FinancialAccountClient) Create() *FinancialAccountCreate {
+	mutation := newFinancialAccountMutation(c.config, OpCreate)
+	return &FinancialAccountCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of FinancialAccount entities.
+func (c *FinancialAccountClient) CreateBulk(builders ...*FinancialAccountCreate) *FinancialAccountCreateBulk {
+	return &FinancialAccountCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for FinancialAccount.
+func (c *FinancialAccountClient) Update() *FinancialAccountUpdate {
+	mutation := newFinancialAccountMutation(c.config, OpUpdate)
+	return &FinancialAccountUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *FinancialAccountClient) UpdateOne(fa *FinancialAccount) *FinancialAccountUpdateOne {
+	mutation := newFinancialAccountMutation(c.config, OpUpdateOne, withFinancialAccount(fa))
+	return &FinancialAccountUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *FinancialAccountClient) UpdateOneID(id string) *FinancialAccountUpdateOne {
+	mutation := newFinancialAccountMutation(c.config, OpUpdateOne, withFinancialAccountID(id))
+	return &FinancialAccountUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for FinancialAccount.
+func (c *FinancialAccountClient) Delete() *FinancialAccountDelete {
+	mutation := newFinancialAccountMutation(c.config, OpDelete)
+	return &FinancialAccountDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *FinancialAccountClient) DeleteOne(fa *FinancialAccount) *FinancialAccountDeleteOne {
+	return c.DeleteOneID(fa.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *FinancialAccountClient) DeleteOneID(id string) *FinancialAccountDeleteOne {
+	builder := c.Delete().Where(financialaccount.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &FinancialAccountDeleteOne{builder}
+}
+
+// Query returns a query builder for FinancialAccount.
+func (c *FinancialAccountClient) Query() *FinancialAccountQuery {
+	return &FinancialAccountQuery{
+		config: c.config,
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a FinancialAccount entity by its id.
+func (c *FinancialAccountClient) Get(ctx context.Context, id string) (*FinancialAccount, error) {
+	return c.Query().Where(financialaccount.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *FinancialAccountClient) GetX(ctx context.Context, id string) *FinancialAccount {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryOwner queries the owner edge of a FinancialAccount.
+func (c *FinancialAccountClient) QueryOwner(fa *FinancialAccount) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := fa.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(financialaccount.Table, financialaccount.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, financialaccount.OwnerTable, financialaccount.OwnerColumn),
+		)
+		fromV = sqlgraph.Neighbors(fa.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *FinancialAccountClient) Hooks() []Hook {
+	return c.hooks.FinancialAccount
+}
+
+// Interceptors returns the client interceptors.
+func (c *FinancialAccountClient) Interceptors() []Interceptor {
+	return c.inters.FinancialAccount
+}
+
+func (c *FinancialAccountClient) mutate(ctx context.Context, m *FinancialAccountMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&FinancialAccountCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&FinancialAccountUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&FinancialAccountUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&FinancialAccountDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown FinancialAccount mutation op: %q", m.Op())
+	}
+}
+
 // UserClient is a client for the User schema.
 type UserClient struct {
 	config
@@ -415,6 +558,22 @@ func (c *UserClient) QueryContactLinks(u *User) *ContactQuery {
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(contact.Table, contact.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.ContactLinksTable, user.ContactLinksColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryFinancialAccounts queries the financial_accounts edge of a User.
+func (c *UserClient) QueryFinancialAccounts(u *User) *FinancialAccountQuery {
+	query := (&FinancialAccountClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(financialaccount.Table, financialaccount.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.FinancialAccountsTable, user.FinancialAccountsColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil

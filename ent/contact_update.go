@@ -100,17 +100,6 @@ func (cu *ContactUpdate) ClearImageURL() *ContactUpdate {
 	return cu
 }
 
-// SetOwnerID sets the "owner" edge to the User entity by ID.
-func (cu *ContactUpdate) SetOwnerID(id string) *ContactUpdate {
-	cu.mutation.SetOwnerID(id)
-	return cu
-}
-
-// SetOwner sets the "owner" edge to the User entity.
-func (cu *ContactUpdate) SetOwner(u *User) *ContactUpdate {
-	return cu.SetOwnerID(u.ID)
-}
-
 // SetLinkedToID sets the "linked_to" edge to the User entity by ID.
 func (cu *ContactUpdate) SetLinkedToID(id string) *ContactUpdate {
 	cu.mutation.SetLinkedToID(id)
@@ -133,12 +122,6 @@ func (cu *ContactUpdate) SetLinkedTo(u *User) *ContactUpdate {
 // Mutation returns the ContactMutation object of the builder.
 func (cu *ContactUpdate) Mutation() *ContactMutation {
 	return cu.mutation
-}
-
-// ClearOwner clears the "owner" edge to the User entity.
-func (cu *ContactUpdate) ClearOwner() *ContactUpdate {
-	cu.mutation.ClearOwner()
-	return cu
 }
 
 // ClearLinkedTo clears the "linked_to" edge to the User entity.
@@ -228,41 +211,6 @@ func (cu *ContactUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if cu.mutation.ImageURLCleared() {
 		_spec.ClearField(contact.FieldImageURL, field.TypeString)
-	}
-	if cu.mutation.OwnerCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   contact.OwnerTable,
-			Columns: []string{contact.OwnerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: user.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := cu.mutation.OwnerIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   contact.OwnerTable,
-			Columns: []string{contact.OwnerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if cu.mutation.LinkedToCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -390,17 +338,6 @@ func (cuo *ContactUpdateOne) ClearImageURL() *ContactUpdateOne {
 	return cuo
 }
 
-// SetOwnerID sets the "owner" edge to the User entity by ID.
-func (cuo *ContactUpdateOne) SetOwnerID(id string) *ContactUpdateOne {
-	cuo.mutation.SetOwnerID(id)
-	return cuo
-}
-
-// SetOwner sets the "owner" edge to the User entity.
-func (cuo *ContactUpdateOne) SetOwner(u *User) *ContactUpdateOne {
-	return cuo.SetOwnerID(u.ID)
-}
-
 // SetLinkedToID sets the "linked_to" edge to the User entity by ID.
 func (cuo *ContactUpdateOne) SetLinkedToID(id string) *ContactUpdateOne {
 	cuo.mutation.SetLinkedToID(id)
@@ -423,12 +360,6 @@ func (cuo *ContactUpdateOne) SetLinkedTo(u *User) *ContactUpdateOne {
 // Mutation returns the ContactMutation object of the builder.
 func (cuo *ContactUpdateOne) Mutation() *ContactMutation {
 	return cuo.mutation
-}
-
-// ClearOwner clears the "owner" edge to the User entity.
-func (cuo *ContactUpdateOne) ClearOwner() *ContactUpdateOne {
-	cuo.mutation.ClearOwner()
-	return cuo
 }
 
 // ClearLinkedTo clears the "linked_to" edge to the User entity.
@@ -542,41 +473,6 @@ func (cuo *ContactUpdateOne) sqlSave(ctx context.Context) (_node *Contact, err e
 	}
 	if cuo.mutation.ImageURLCleared() {
 		_spec.ClearField(contact.FieldImageURL, field.TypeString)
-	}
-	if cuo.mutation.OwnerCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   contact.OwnerTable,
-			Columns: []string{contact.OwnerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: user.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := cuo.mutation.OwnerIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   contact.OwnerTable,
-			Columns: []string{contact.OwnerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if cuo.mutation.LinkedToCleared() {
 		edge := &sqlgraph.EdgeSpec{

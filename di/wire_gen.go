@@ -10,6 +10,7 @@ import (
 	"github.com/google/wire"
 	"github.com/maestre3d/coinlog"
 	"github.com/maestre3d/coinlog/domain/contact"
+	"github.com/maestre3d/coinlog/domain/financialaccount"
 	"github.com/maestre3d/coinlog/domain/user"
 	"github.com/maestre3d/coinlog/storage/sql"
 	"github.com/maestre3d/coinlog/transport/http"
@@ -37,10 +38,14 @@ func NewCoinlogHTTP() (*CoinlogHTTP, func(), error) {
 	contactStorage := sql.NewContactStorage(client)
 	contactService := contact.NewService(contactStorage)
 	contactController := http.NewContactController(contactService)
+	financialAccountStorage := sql.NewFinancialAccountStorage(client)
+	financialaccountService := financialaccount.NewService(financialAccountStorage)
+	financialAccountController := http.NewFinancialController(financialaccountService)
 	diHttpCtrl := httpCtrl{
 		Healthcheck: healthcheckController,
 		User:        userController,
 		Contact:     contactController,
+		FinAccount:  financialAccountController,
 	}
 	controllerMapper := provideHttpRoutes(diCoinlogHTTPConfig, diHttpCtrl)
 	echo := http.NewEcho(httpConfig, controllerMapper)
@@ -61,17 +66,25 @@ var userSet = wire.NewSet(wire.Bind(new(user.Repository), new(sql.UserStorage)),
 
 var contactSet = wire.NewSet(wire.Bind(new(contact.Repository), new(sql.ContactStorage)), sql.NewContactStorage, contact.NewService, http.NewContactController)
 
+var finAccountSet = wire.NewSet(wire.Bind(new(financialaccount.Repository), new(sql.FinancialAccountStorage)), sql.NewFinancialAccountStorage, financialaccount.NewService, http.NewFinancialController)
+
 // Holds all controllers for HTTP protocol, wire auto-binds inner deps.
 type httpCtrl struct {
 	//Liveness controller.LivenessHTTP
 	Healthcheck http.HealthcheckController
 	User        http.UserController
 	Contact     http.ContactController
+	FinAccount  http.FinancialAccountController
 }
 
 func provideHttpRoutes(cfg coinlogHTTPConfig, ctrls httpCtrl) *http.ControllerMapper {
 	mapper := http.NewControllerMapper(cfg.Application, cfg.Server)
 
-	mapper.Add(ctrls.Healthcheck, ctrls.User, ctrls.Contact)
+	mapper.Add(
+		ctrls.Healthcheck,
+		ctrls.User,
+		ctrls.Contact,
+		ctrls.FinAccount,
+	)
 	return mapper
 }
