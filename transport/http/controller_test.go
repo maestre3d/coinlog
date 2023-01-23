@@ -35,14 +35,20 @@ func TestNewControllerMapper(t *testing.T) {
 
 	e := echo.New()
 	mapper.RegisterRoutes(e)
-	exp := [][]string{
-		{"/health", "GET"},
-		{"/fake", "GET"},
-		{"/v12/fake", "DELETE"},
+	expMap := map[string]string{
+		"/health":   "GET",
+		"/fake":     "GET",
+		"/v12/fake": "DELETE",
 	}
 	routes := e.Routes()
-	for i, r := range routes {
-		assert.Equal(t, exp[i][0], r.Path)
-		assert.Equal(t, exp[i][1], r.Method)
+	foundCount := len(routes)
+	for _, r := range routes {
+		expRoute, ok := expMap[r.Path]
+		if !ok {
+			continue
+		}
+		foundCount--
+		assert.Equal(t, expRoute, r.Method)
 	}
+	assert.Zero(t, foundCount)
 }

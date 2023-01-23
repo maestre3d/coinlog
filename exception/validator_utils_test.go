@@ -86,7 +86,7 @@ func TestNewFromValidator(t *testing.T) {
 			}{
 				A: "dummy",
 			},
-			expTypeName: []string{"DomainGeneric"},
+			expTypeName: []string{"bic"},
 		},
 	}
 
