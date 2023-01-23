@@ -8,6 +8,43 @@ import (
 )
 
 var (
+	// CardsColumns holds the columns for the "cards" table.
+	CardsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true},
+		{Name: "is_active", Type: field.TypeBool},
+		{Name: "version", Type: field.TypeUint32},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "display_name", Type: field.TypeString},
+		{Name: "bank_name", Type: field.TypeString, Nullable: true},
+		{Name: "last_digits", Type: field.TypeUint16, Nullable: true},
+		{Name: "balance", Type: field.TypeFloat64},
+		{Name: "balance_limit", Type: field.TypeFloat64},
+		{Name: "currency_code", Type: field.TypeString},
+		{Name: "card_type", Type: field.TypeString},
+		{Name: "financial_account_id", Type: field.TypeString, Nullable: true},
+		{Name: "user_cards", Type: field.TypeString},
+	}
+	// CardsTable holds the schema information for the "cards" table.
+	CardsTable = &schema.Table{
+		Name:       "cards",
+		Columns:    CardsColumns,
+		PrimaryKey: []*schema.Column{CardsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "cards_financial_accounts_cards",
+				Columns:    []*schema.Column{CardsColumns[12]},
+				RefColumns: []*schema.Column{FinancialAccountsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "cards_users_cards",
+				Columns:    []*schema.Column{CardsColumns[13]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// ContactsColumns holds the columns for the "contacts" table.
 	ContactsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true},
@@ -85,6 +122,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		CardsTable,
 		ContactsTable,
 		FinancialAccountsTable,
 		UsersTable,
@@ -92,6 +130,8 @@ var (
 )
 
 func init() {
+	CardsTable.ForeignKeys[0].RefTable = FinancialAccountsTable
+	CardsTable.ForeignKeys[1].RefTable = UsersTable
 	ContactsTable.ForeignKeys[0].RefTable = UsersTable
 	ContactsTable.ForeignKeys[1].RefTable = UsersTable
 	FinancialAccountsTable.ForeignKeys[0].RefTable = UsersTable

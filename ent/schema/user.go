@@ -35,5 +35,6 @@ func (User) Edges() []ent.Edge {
 		edge.To("contacts", Contact.Type),
 		edge.To("contact_links", Contact.Type),
 		edge.To("financial_accounts", FinancialAccount.Type),
+		edge.To("cards", Card.Type),
 	}
 }

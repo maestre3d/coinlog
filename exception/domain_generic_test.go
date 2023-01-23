@@ -11,11 +11,12 @@ import (
 func TestNewDomainGeneric(t *testing.T) {
 	var fakeErr = errors.New("foo error")
 	ex := exception.DomainGeneric{
+		Code:   "MissingFoo",
 		Parent: fakeErr,
 	}
 	assert.Equal(t, "foo error", ex.Error())
 	assert.Equal(t, "foo error", ex.String())
-	assert.Equal(t, "DomainGeneric", ex.TypeName())
+	assert.Equal(t, "MissingFoo", ex.TypeName())
 	assert.EqualValues(t, fakeErr, ex.Unwrap())
 	assert.Equal(t, fakeErr, errors.Unwrap(ex))
 }

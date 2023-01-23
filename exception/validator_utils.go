@@ -68,6 +68,9 @@ func NewFromValidator(v validator.FieldError) Exception {
 				ValidValues: tag,
 			}
 		}
-		return DomainGeneric{Parent: v.(error)}
+		return DomainGeneric{
+			Code:   tag,
+			Parent: v.(error),
+		}
 	}
 }

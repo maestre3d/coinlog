@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/maestre3d/coinlog/ent/card"
 	"github.com/maestre3d/coinlog/ent/financialaccount"
 	"github.com/maestre3d/coinlog/ent/user"
 )
@@ -101,6 +102,21 @@ func (fac *FinancialAccountCreate) SetOwnerID(id string) *FinancialAccountCreate
 // SetOwner sets the "owner" edge to the User entity.
 func (fac *FinancialAccountCreate) SetOwner(u *User) *FinancialAccountCreate {
 	return fac.SetOwnerID(u.ID)
+}
+
+// AddCardIDs adds the "cards" edge to the Card entity by IDs.
+func (fac *FinancialAccountCreate) AddCardIDs(ids ...string) *FinancialAccountCreate {
+	fac.mutation.AddCardIDs(ids...)
+	return fac
+}
+
+// AddCards adds the "cards" edges to the Card entity.
+func (fac *FinancialAccountCreate) AddCards(c ...*Card) *FinancialAccountCreate {
+	ids := make([]string, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return fac.AddCardIDs(ids...)
 }
 
 // Mutation returns the FinancialAccountMutation object of the builder.
@@ -280,6 +296,25 @@ func (fac *FinancialAccountCreate) createSpec() (*FinancialAccount, *sqlgraph.Cr
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.user_financial_accounts = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := fac.mutation.CardsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   financialaccount.CardsTable,
+			Columns: []string{financialaccount.CardsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: card.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

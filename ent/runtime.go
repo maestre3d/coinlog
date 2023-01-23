@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"github.com/maestre3d/coinlog/ent/card"
 	"github.com/maestre3d/coinlog/ent/contact"
 	"github.com/maestre3d/coinlog/ent/financialaccount"
 	"github.com/maestre3d/coinlog/ent/schema"
@@ -13,6 +14,24 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	cardFields := schema.Card{}.Fields()
+	_ = cardFields
+	// cardDescDisplayName is the schema descriptor for display_name field.
+	cardDescDisplayName := cardFields[2].Descriptor()
+	// card.DisplayNameValidator is a validator for the "display_name" field. It is called by the builders before save.
+	card.DisplayNameValidator = cardDescDisplayName.Validators[0].(func(string) error)
+	// cardDescCurrencyCode is the schema descriptor for currency_code field.
+	cardDescCurrencyCode := cardFields[7].Descriptor()
+	// card.CurrencyCodeValidator is a validator for the "currency_code" field. It is called by the builders before save.
+	card.CurrencyCodeValidator = cardDescCurrencyCode.Validators[0].(func(string) error)
+	// cardDescCardType is the schema descriptor for card_type field.
+	cardDescCardType := cardFields[8].Descriptor()
+	// card.CardTypeValidator is a validator for the "card_type" field. It is called by the builders before save.
+	card.CardTypeValidator = cardDescCardType.Validators[0].(func(string) error)
+	// cardDescID is the schema descriptor for id field.
+	cardDescID := cardFields[0].Descriptor()
+	// card.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	card.IDValidator = cardDescID.Validators[0].(func(string) error)
 	contactFields := schema.Contact{}.Fields()
 	_ = contactFields
 	// contactDescDisplayName is the schema descriptor for display_name field.

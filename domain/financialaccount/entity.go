@@ -49,9 +49,13 @@ func (f *FinancialAccount) update(cmd UpdateCommand) error {
 		return err
 	}
 
+	accType, err := NewAccountTypeSafe(cmd.AccountType)
+	if err != nil {
+		return err
+	}
+	f.AccountType = accType
 	f.DisplayName = cmd.DisplayName
 	f.BankName = cmd.BankName
-	f.AccountType = NewAccountType(cmd.AccountType)
 	f.Balance = cmd.Balance
 	f.Version++
 	f.UpdatedAt = time.Now().UTC()

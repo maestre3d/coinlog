@@ -9,6 +9,7 @@ package di
 import (
 	"github.com/google/wire"
 	"github.com/maestre3d/coinlog"
+	"github.com/maestre3d/coinlog/domain/card"
 	"github.com/maestre3d/coinlog/domain/contact"
 	"github.com/maestre3d/coinlog/domain/financialaccount"
 	"github.com/maestre3d/coinlog/domain/user"
@@ -41,11 +42,15 @@ func NewCoinlogHTTP() (*CoinlogHTTP, func(), error) {
 	financialAccountStorage := sql.NewFinancialAccountStorage(client)
 	financialaccountService := financialaccount.NewService(financialAccountStorage)
 	financialAccountController := http.NewFinancialController(financialaccountService)
+	cardStorage := sql.NewCardStorage(client)
+	cardService := card.NewService(cardStorage, financialAccountStorage)
+	cardController := http.NewCardController(cardService)
 	diHttpCtrl := httpCtrl{
 		Healthcheck: healthcheckController,
 		User:        userController,
 		Contact:     contactController,
 		FinAccount:  financialAccountController,
+		Card:        cardController,
 	}
 	controllerMapper := provideHttpRoutes(diCoinlogHTTPConfig, diHttpCtrl)
 	echo := http.NewEcho(httpConfig, controllerMapper)
@@ -68,6 +73,8 @@ var contactSet = wire.NewSet(wire.Bind(new(contact.Repository), new(sql.ContactS
 
 var finAccountSet = wire.NewSet(wire.Bind(new(financialaccount.Repository), new(sql.FinancialAccountStorage)), sql.NewFinancialAccountStorage, financialaccount.NewService, http.NewFinancialController)
 
+var cardSet = wire.NewSet(wire.Bind(new(card.Repository), new(sql.CardStorage)), sql.NewCardStorage, card.NewService, http.NewCardController)
+
 // Holds all controllers for HTTP protocol, wire auto-binds inner deps.
 type httpCtrl struct {
 	//Liveness controller.LivenessHTTP
@@ -75,6 +82,7 @@ type httpCtrl struct {
 	User        http.UserController
 	Contact     http.ContactController
 	FinAccount  http.FinancialAccountController
+	Card        http.CardController
 }
 
 func provideHttpRoutes(cfg coinlogHTTPConfig, ctrls httpCtrl) *http.ControllerMapper {
@@ -85,6 +93,7 @@ func provideHttpRoutes(cfg coinlogHTTPConfig, ctrls httpCtrl) *http.ControllerMa
 		ctrls.User,
 		ctrls.Contact,
 		ctrls.FinAccount,
+		ctrls.Card,
 	)
 	return mapper
 }

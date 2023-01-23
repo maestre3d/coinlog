@@ -14,14 +14,14 @@ import (
 // Assets could come from either FinancialAccount directly or from a Card; both instruments are mutually exclusive.
 type ScheduledPayment struct {
 	ID               string
-	User             user.User                         // FK -> users
-	FinancialAccount financialaccount.FinancialAccount // FK -> financial_accounts, nullable
-	Card             card.Card                         // FK -> cards, nullable
-	Contact          contact.Contact                   // FK -> contacts
-	DisplayName      string                            // req
+	User             user.User                          // FK -> users
+	FinancialAccount *financialaccount.FinancialAccount // FK -> financial_accounts, nullable
+	Card             *card.Card                         // FK -> cards, nullable
+	Contact          contact.Contact                    // FK -> contacts
+	DisplayName      string                             // req
 	Description      string
 	Amount           float64
-	Currency         string // uses ISO-4127 standard
+	CurrencyCode     string // uses ISO-4127 standard
 	IntervalDays     uint16 // req
 	customtype.Auditable
 }

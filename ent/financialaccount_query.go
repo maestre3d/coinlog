@@ -4,12 +4,14 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/maestre3d/coinlog/ent/card"
 	"github.com/maestre3d/coinlog/ent/financialaccount"
 	"github.com/maestre3d/coinlog/ent/predicate"
 	"github.com/maestre3d/coinlog/ent/user"
@@ -26,6 +28,7 @@ type FinancialAccountQuery struct {
 	inters     []Interceptor
 	predicates []predicate.FinancialAccount
 	withOwner  *UserQuery
+	withCards  *CardQuery
 	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -78,6 +81,28 @@ func (faq *FinancialAccountQuery) QueryOwner() *UserQuery {
 			sqlgraph.From(financialaccount.Table, financialaccount.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, financialaccount.OwnerTable, financialaccount.OwnerColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(faq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryCards chains the current query on the "cards" edge.
+func (faq *FinancialAccountQuery) QueryCards() *CardQuery {
+	query := (&CardClient{config: faq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := faq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := faq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(financialaccount.Table, financialaccount.FieldID, selector),
+			sqlgraph.To(card.Table, card.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, financialaccount.CardsTable, financialaccount.CardsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(faq.driver.Dialect(), step)
 		return fromU, nil
@@ -277,6 +302,7 @@ func (faq *FinancialAccountQuery) Clone() *FinancialAccountQuery {
 		inters:     append([]Interceptor{}, faq.inters...),
 		predicates: append([]predicate.FinancialAccount{}, faq.predicates...),
 		withOwner:  faq.withOwner.Clone(),
+		withCards:  faq.withCards.Clone(),
 		// clone intermediate query.
 		sql:    faq.sql.Clone(),
 		path:   faq.path,
@@ -292,6 +318,17 @@ func (faq *FinancialAccountQuery) WithOwner(opts ...func(*UserQuery)) *Financial
 		opt(query)
 	}
 	faq.withOwner = query
+	return faq
+}
+
+// WithCards tells the query-builder to eager-load the nodes that are connected to
+// the "cards" edge. The optional arguments are used to configure the query builder of the edge.
+func (faq *FinancialAccountQuery) WithCards(opts ...func(*CardQuery)) *FinancialAccountQuery {
+	query := (&CardClient{config: faq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	faq.withCards = query
 	return faq
 }
 
@@ -374,8 +411,9 @@ func (faq *FinancialAccountQuery) sqlAll(ctx context.Context, hooks ...queryHook
 		nodes       = []*FinancialAccount{}
 		withFKs     = faq.withFKs
 		_spec       = faq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			faq.withOwner != nil,
+			faq.withCards != nil,
 		}
 	)
 	if faq.withOwner != nil {
@@ -408,6 +446,13 @@ func (faq *FinancialAccountQuery) sqlAll(ctx context.Context, hooks ...queryHook
 			return nil, err
 		}
 	}
+	if query := faq.withCards; query != nil {
+		if err := faq.loadCards(ctx, query, nodes,
+			func(n *FinancialAccount) { n.Edges.Cards = []*Card{} },
+			func(n *FinancialAccount, e *Card) { n.Edges.Cards = append(n.Edges.Cards, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
@@ -437,6 +482,34 @@ func (faq *FinancialAccountQuery) loadOwner(ctx context.Context, query *UserQuer
 		for i := range nodes {
 			assign(nodes[i], n)
 		}
+	}
+	return nil
+}
+func (faq *FinancialAccountQuery) loadCards(ctx context.Context, query *CardQuery, nodes []*FinancialAccount, init func(*FinancialAccount), assign func(*FinancialAccount, *Card)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*FinancialAccount)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.InValues(financialaccount.CardsColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.FinancialAccountID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "financial_account_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
 	}
 	return nil
 }

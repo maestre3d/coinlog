@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/maestre3d/coinlog/ent/card"
 	"github.com/maestre3d/coinlog/ent/financialaccount"
 	"github.com/maestre3d/coinlog/ent/predicate"
 )
@@ -104,9 +105,45 @@ func (fau *FinancialAccountUpdate) SetCurrencyCode(s string) *FinancialAccountUp
 	return fau
 }
 
+// AddCardIDs adds the "cards" edge to the Card entity by IDs.
+func (fau *FinancialAccountUpdate) AddCardIDs(ids ...string) *FinancialAccountUpdate {
+	fau.mutation.AddCardIDs(ids...)
+	return fau
+}
+
+// AddCards adds the "cards" edges to the Card entity.
+func (fau *FinancialAccountUpdate) AddCards(c ...*Card) *FinancialAccountUpdate {
+	ids := make([]string, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return fau.AddCardIDs(ids...)
+}
+
 // Mutation returns the FinancialAccountMutation object of the builder.
 func (fau *FinancialAccountUpdate) Mutation() *FinancialAccountMutation {
 	return fau.mutation
+}
+
+// ClearCards clears all "cards" edges to the Card entity.
+func (fau *FinancialAccountUpdate) ClearCards() *FinancialAccountUpdate {
+	fau.mutation.ClearCards()
+	return fau
+}
+
+// RemoveCardIDs removes the "cards" edge to Card entities by IDs.
+func (fau *FinancialAccountUpdate) RemoveCardIDs(ids ...string) *FinancialAccountUpdate {
+	fau.mutation.RemoveCardIDs(ids...)
+	return fau
+}
+
+// RemoveCards removes "cards" edges to Card entities.
+func (fau *FinancialAccountUpdate) RemoveCards(c ...*Card) *FinancialAccountUpdate {
+	ids := make([]string, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return fau.RemoveCardIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -213,6 +250,60 @@ func (fau *FinancialAccountUpdate) sqlSave(ctx context.Context) (n int, err erro
 	if value, ok := fau.mutation.CurrencyCode(); ok {
 		_spec.SetField(financialaccount.FieldCurrencyCode, field.TypeString, value)
 	}
+	if fau.mutation.CardsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   financialaccount.CardsTable,
+			Columns: []string{financialaccount.CardsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: card.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := fau.mutation.RemovedCardsIDs(); len(nodes) > 0 && !fau.mutation.CardsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   financialaccount.CardsTable,
+			Columns: []string{financialaccount.CardsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: card.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := fau.mutation.CardsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   financialaccount.CardsTable,
+			Columns: []string{financialaccount.CardsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: card.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, fau.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{financialaccount.Label}
@@ -309,9 +400,45 @@ func (fauo *FinancialAccountUpdateOne) SetCurrencyCode(s string) *FinancialAccou
 	return fauo
 }
 
+// AddCardIDs adds the "cards" edge to the Card entity by IDs.
+func (fauo *FinancialAccountUpdateOne) AddCardIDs(ids ...string) *FinancialAccountUpdateOne {
+	fauo.mutation.AddCardIDs(ids...)
+	return fauo
+}
+
+// AddCards adds the "cards" edges to the Card entity.
+func (fauo *FinancialAccountUpdateOne) AddCards(c ...*Card) *FinancialAccountUpdateOne {
+	ids := make([]string, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return fauo.AddCardIDs(ids...)
+}
+
 // Mutation returns the FinancialAccountMutation object of the builder.
 func (fauo *FinancialAccountUpdateOne) Mutation() *FinancialAccountMutation {
 	return fauo.mutation
+}
+
+// ClearCards clears all "cards" edges to the Card entity.
+func (fauo *FinancialAccountUpdateOne) ClearCards() *FinancialAccountUpdateOne {
+	fauo.mutation.ClearCards()
+	return fauo
+}
+
+// RemoveCardIDs removes the "cards" edge to Card entities by IDs.
+func (fauo *FinancialAccountUpdateOne) RemoveCardIDs(ids ...string) *FinancialAccountUpdateOne {
+	fauo.mutation.RemoveCardIDs(ids...)
+	return fauo
+}
+
+// RemoveCards removes "cards" edges to Card entities.
+func (fauo *FinancialAccountUpdateOne) RemoveCards(c ...*Card) *FinancialAccountUpdateOne {
+	ids := make([]string, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return fauo.RemoveCardIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -441,6 +568,60 @@ func (fauo *FinancialAccountUpdateOne) sqlSave(ctx context.Context) (_node *Fina
 	}
 	if value, ok := fauo.mutation.CurrencyCode(); ok {
 		_spec.SetField(financialaccount.FieldCurrencyCode, field.TypeString, value)
+	}
+	if fauo.mutation.CardsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   financialaccount.CardsTable,
+			Columns: []string{financialaccount.CardsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: card.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := fauo.mutation.RemovedCardsIDs(); len(nodes) > 0 && !fauo.mutation.CardsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   financialaccount.CardsTable,
+			Columns: []string{financialaccount.CardsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: card.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := fauo.mutation.CardsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   financialaccount.CardsTable,
+			Columns: []string{financialaccount.CardsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: card.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &FinancialAccount{config: fauo.config}
 	_spec.Assign = _node.assignValues

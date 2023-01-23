@@ -6,6 +6,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// Card is the predicate function for card builders.
+type Card func(*sql.Selector)
+
 // Contact is the predicate function for contact builders.
 type Contact func(*sql.Selector)
 

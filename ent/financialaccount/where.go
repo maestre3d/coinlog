@@ -567,6 +567,33 @@ func HasOwnerWith(preds ...predicate.User) predicate.FinancialAccount {
 	})
 }
 
+// HasCards applies the HasEdge predicate on the "cards" edge.
+func HasCards() predicate.FinancialAccount {
+	return predicate.FinancialAccount(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, CardsTable, CardsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasCardsWith applies the HasEdge predicate on the "cards" edge with a given conditions (other predicates).
+func HasCardsWith(preds ...predicate.Card) predicate.FinancialAccount {
+	return predicate.FinancialAccount(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(CardsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, CardsTable, CardsColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.FinancialAccount) predicate.FinancialAccount {
 	return predicate.FinancialAccount(func(s *sql.Selector) {

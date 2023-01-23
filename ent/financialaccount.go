@@ -45,9 +45,11 @@ type FinancialAccount struct {
 type FinancialAccountEdges struct {
 	// Owner holds the value of the owner edge.
 	Owner *User `json:"owner,omitempty"`
+	// Cards holds the value of the cards edge.
+	Cards []*Card `json:"cards,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // OwnerOrErr returns the Owner value or an error if the edge
@@ -61,6 +63,15 @@ func (e FinancialAccountEdges) OwnerOrErr() (*User, error) {
 		return e.Owner, nil
 	}
 	return nil, &NotLoadedError{edge: "owner"}
+}
+
+// CardsOrErr returns the Cards value or an error if the edge
+// was not loaded in eager-loading.
+func (e FinancialAccountEdges) CardsOrErr() ([]*Card, error) {
+	if e.loadedTypes[1] {
+		return e.Cards, nil
+	}
+	return nil, &NotLoadedError{edge: "cards"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -170,6 +181,11 @@ func (fa *FinancialAccount) assignValues(columns []string, values []any) error {
 // QueryOwner queries the "owner" edge of the FinancialAccount entity.
 func (fa *FinancialAccount) QueryOwner() *UserQuery {
 	return (&FinancialAccountClient{config: fa.config}).QueryOwner(fa)
+}
+
+// QueryCards queries the "cards" edge of the FinancialAccount entity.
+func (fa *FinancialAccount) QueryCards() *CardQuery {
+	return (&FinancialAccountClient{config: fa.config}).QueryCards(fa)
 }
 
 // Update returns a builder for updating this FinancialAccount.

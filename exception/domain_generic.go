@@ -1,6 +1,7 @@
 package exception
 
 type DomainGeneric struct {
+	Code   string
 	Parent error
 }
 
@@ -17,7 +18,7 @@ func (e DomainGeneric) String() string {
 }
 
 func (e DomainGeneric) TypeName() string {
-	return newExceptionTypeName(e)
+	return e.Code
 }
 
 func (e DomainGeneric) Unwrap() error {

@@ -5,6 +5,7 @@ package di
 import (
 	"github.com/google/wire"
 	"github.com/maestre3d/coinlog"
+	"github.com/maestre3d/coinlog/domain/card"
 	"github.com/maestre3d/coinlog/domain/contact"
 	"github.com/maestre3d/coinlog/domain/financialaccount"
 	"github.com/maestre3d/coinlog/domain/user"
@@ -40,6 +41,13 @@ var finAccountSet = wire.NewSet(
 	http.NewFinancialController,
 )
 
+var cardSet = wire.NewSet(
+	wire.Bind(new(card.Repository), new(sql.CardStorage)),
+	sql.NewCardStorage,
+	card.NewService,
+	http.NewCardController,
+)
+
 // Holds all controllers for HTTP protocol, wire auto-binds inner deps.
 type httpCtrl struct {
 	//Liveness controller.LivenessHTTP
@@ -47,6 +55,7 @@ type httpCtrl struct {
 	User        http.UserController
 	Contact     http.ContactController
 	FinAccount  http.FinancialAccountController
+	Card        http.CardController
 }
 
 func provideHttpRoutes(cfg coinlogHTTPConfig, ctrls httpCtrl) *http.ControllerMapper {
@@ -59,6 +68,7 @@ func provideHttpRoutes(cfg coinlogHTTPConfig, ctrls httpCtrl) *http.ControllerMa
 		ctrls.User,
 		ctrls.Contact,
 		ctrls.FinAccount,
+		ctrls.Card,
 	)
 	return mapper
 }
@@ -70,6 +80,7 @@ func NewCoinlogHTTP() (*CoinlogHTTP, func(), error) {
 		userSet,
 		contactSet,
 		finAccountSet,
+		cardSet,
 		http.NewHealthcheckController,
 		wire.Struct(new(httpCtrl), "*"),
 		provideHttpRoutes,

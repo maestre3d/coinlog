@@ -44,5 +44,6 @@ func (FinancialAccount) Edges() []ent.Edge {
 			Unique().
 			Required().
 			Immutable(),
+		edge.To("cards", Card.Type),
 	}
 }
