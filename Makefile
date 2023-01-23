@@ -18,3 +18,7 @@ new-migration:
 
 new-mock:
 	mockery --dir=./domain/user --name=Repository --structname=UserRepository --filename=user_repository.go
+
+gen-coverage:
+	go test ./... -coverprofile coverage.out . && go tool cover -html=coverage.out
+

@@ -78,16 +78,6 @@ jobs:
       - name: Run Unit Testing
         run: go test ./... -cover -v
 
-      - name: Generate coverage report
-        run: |
-          go test `go list ./... | grep -v examples` -coverprofile=coverage.txt -covermode=atomic
-
-      - name: Upload coverage report
-        uses: codecov/codecov-action@v1
-        with:
-          file: ./coverage.txt
-          flags: unittests
-          name: codecov-umbrella
   integration-testing:
     name: Run Integration Tests
     strategy:
@@ -137,8 +127,15 @@ jobs:
           dir-format: atlas
           dev-url: postgres://postgres:root@localhost:6432/coinlog?sslmode=disable
 
-      - name: Run Integration Testing
-        run: go test ./... -tags=integration
+      - name: Run Integration Testing and Generate Coverage Report
+        run: go test ./... -tags=integration -coverprofile=coverage.txt -covermode=atomic
+
+      - name: Upload Coverage Report
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage.txt
+          flags: unittests
+          name: coinlog-testing
 
   build:
     name: Build artifact
