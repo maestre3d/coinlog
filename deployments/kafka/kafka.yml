@@ -4,6 +4,7 @@ metadata:
   name: kafka-pv-volume
   labels:
     type: local
+    app: coinlog-kafka
 spec:
   storageClassName: manual
   capacity:
@@ -18,6 +19,8 @@ kind: PersistentVolumeClaim
 metadata:
   name: kafka-pv-claim
   namespace: coinlog
+  labels:
+    app: coinlog-kafka
 spec:
   storageClassName: manual
   accessModes:
@@ -31,7 +34,7 @@ kind: Service
 metadata:
   name: kafka-svc
   labels:
-    app: kafka-app
+    app: coinlog-kafka
   namespace: coinlog
 spec:
   clusterIP: None
@@ -41,25 +44,25 @@ spec:
       protocol: TCP
       targetPort: 9092
   selector:
-    app: kafka-app
+    app: coinlog-kafka
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: kafka
   labels:
-    app: kafka-app
+    app: coinlog
   namespace: coinlog
 spec:
   serviceName: kafka-svc
   replicas: 3
   selector:
     matchLabels:
-      app: kafka-app
+      app: coinlog-kafka
   template:
     metadata:
       labels:
-        app: kafka-app
+        app: coinlog-kafka
     spec:
       volumes:
         - name: kafka-storage
