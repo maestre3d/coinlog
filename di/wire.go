@@ -76,7 +76,7 @@ func provideHttpRoutes(cfg coinlogHTTPConfig, ctrls httpCtrl) *http.ControllerMa
 func NewCoinlogHTTP() (*CoinlogHTTP, func(), error) {
 	wire.Build(
 		kernelCfgSet,
-		sql.NewEntClient,
+		sql.NewEntClientWithAutoMigrate,
 		userSet,
 		contactSet,
 		finAccountSet,

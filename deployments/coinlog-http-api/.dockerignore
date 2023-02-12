@@ -1,0 +1,10 @@
+/.github
+/.github/*
+
+
+/docs/*
+.golangci.yml
+docker-compose.yaml
+.codebeatignore
+*.md
+LICENSE

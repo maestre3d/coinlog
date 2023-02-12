@@ -8,7 +8,7 @@ type Config struct {
 
 func setConfigDefaults() {
 	viper.SetDefault("database.connection_string",
-		"host=localhost port=6432 user=postgres dbname=coinlog password=root sslmode=disable")
+		"host=localhost port=5432 user=postgres dbname=coinlog password=root sslmode=disable")
 }
 
 func NewConfig() Config {

@@ -29,7 +29,7 @@ func NewCoinlogHTTP() (*CoinlogHTTP, func(), error) {
 		Database:    sqlConfig,
 	}
 	healthcheckController := http.NewHealthcheckController()
-	client, cleanup, err := sql.NewEntClient(sqlConfig)
+	client, cleanup, err := sql.NewEntClientWithAutoMigrate(sqlConfig)
 	if err != nil {
 		return nil, nil, err
 	}
