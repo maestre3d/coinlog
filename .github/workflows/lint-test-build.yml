@@ -93,7 +93,7 @@ jobs:
           POSTGRES_DB: coinlog
           POSTGRES_PASSWORD: root
         ports:
-          - 6432:5432
+          - 5432:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -165,3 +165,6 @@ jobs:
 
       - name: Build artifact
         run: go build cmd/http-api/main.go
+
+      - name: Build Docker image
+        run: docker build -f ./deployments/coinlog-http-api/Dockerfile .
