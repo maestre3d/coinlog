@@ -2,3 +2,41 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: coinlog
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: coinlog-http-api
+  namespace: coinlog
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      proxy_set_header X-Script-Name /pgadmin;
+    # USE in case of SPA web app
+#    nginx.ingress.kubernetes.io/rewrite-target: /$2
+  labels:
+    app: coinlog-http-api
+    tier: edge
+spec:
+  rules:
+    - host: api.coinlog.info
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: coinlog-http-api-svc
+                port:
+                  number: 80
+    - host: pgadmin.db.coinlog.info
+      http:
+        paths:
+          - path: /pgadmin
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: coinlog-pgadmin-svc
+                port:
+                  number: 80

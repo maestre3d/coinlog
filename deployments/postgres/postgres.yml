@@ -10,6 +10,16 @@ stringData:
   superUserPassword: root
   replicationUserPassword: root
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coinlog-postgres-config
+  namespace: coinlog
+  labels:
+    app: coinlog-postgres
+data:
+  db_name: 'coinlog'
+---
 apiVersion: kubegres.reactive-tech.io/v1
 kind: Kubegres
 metadata:
@@ -24,6 +34,11 @@ spec:
   database:
     size: 200Mi
   env:
+    - name: POSTGRES_DB
+      valueFrom:
+        configMapKeyRef:
+          key: db_name
+          name: coinlog-postgres-config
     - name: POSTGRES_PASSWORD
       valueFrom:
         secretKeyRef:
