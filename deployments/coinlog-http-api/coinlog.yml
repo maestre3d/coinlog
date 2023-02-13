@@ -19,6 +19,7 @@ metadata:
 data:
   app_major_version: '1'
   server_port: ':8080'
+  server_path: '/v%d'
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -82,6 +83,11 @@ spec:
                 configMapKeyRef:
                   name: coinlog-http-api-config
                   key: server_port
+            - name: NCORP_SERVER_HTTP_ROOT_PATH_FORMAT
+              valueFrom:
+                configMapKeyRef:
+                  name: coinlog-http-api-config
+                  key: server_path
             - name: NCORP_DATABASE_CONNECTION_STRING
               valueFrom:
                 secretKeyRef:
