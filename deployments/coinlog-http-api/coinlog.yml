@@ -8,6 +8,7 @@ metadata:
 type: Opaque
 stringData:
   db_conn_string: 'host=coinlog-postgres.coinlog.svc.cluster.local port=5432 user=postgres dbname=coinlog password=root sslmode=disable'
+  redis_pwd: 'foo'
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -20,6 +21,8 @@ data:
   app_major_version: '1'
   server_port: ':8080'
   server_path: '/v%d'
+  kafka_address: 'kafka-svc.coinlog.svc.cluster.local:9092'
+  redis_address: 'coinlog-redis.coinlog.svc.cluster.local:6379'
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -48,7 +51,7 @@ spec:
     spec:
       containers:
         - name: coinlog
-          image: coinlog/http-api:0.0.2
+          image: coinlog/http-api:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -78,6 +81,16 @@ spec:
                 configMapKeyRef:
                   name: coinlog-http-api-config
                   key: app_major_version
+            - name: NCORP_MESSAGING_KAFKA_ADDRESS
+              valueFrom:
+                configMapKeyRef:
+                  name: coinlog-http-api-config
+                  key: kafka_address
+            - name: NCORP_DATABASE_CACHING_REDIS_ADDRESS
+              valueFrom:
+                configMapKeyRef:
+                  name: coinlog-http-api-config
+                  key: redis_address
             - name: NCORP_SERVER_HTTP_LISTEN_ADDRESS
               valueFrom:
                 configMapKeyRef:

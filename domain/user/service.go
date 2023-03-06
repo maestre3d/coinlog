@@ -11,16 +11,19 @@ import (
 
 type Service struct {
 	repo Repository
-	bus  messaging.Writer
+	bus  *messaging.Bus
 }
 
 var _ domain.BasicService[View] = Service{}
 
-func NewService(r Repository) Service {
+func NewService(r Repository, b *messaging.Bus) (Service, error) {
+	if err := b.Register(Stream, Event{}); err != nil {
+		return Service{}, err
+	}
 	return Service{
 		repo: r,
-		bus:  nil,
-	}
+		bus:  b,
+	}, nil
 }
 
 func (s Service) Create(ctx context.Context, args any) error {
@@ -29,7 +32,11 @@ func (s Service) Create(ctx context.Context, args any) error {
 		return err
 	}
 
-	return s.repo.Save(ctx, newUser(a))
+	usr := newUser(a)
+	if err := s.repo.Save(ctx, usr); err != nil {
+		return nil
+	}
+	return s.bus.Publish(ctx, usr.PullEvents())
 }
 
 func (s Service) getByID(ctx context.Context, id string) (User, error) {
@@ -51,8 +58,12 @@ func (s Service) Update(ctx context.Context, args any) error {
 	if err != nil {
 		return err
 	}
+
 	usr.update(cmd)
-	return s.repo.Save(ctx, usr)
+	if err = s.repo.Save(ctx, usr); err != nil {
+		return nil
+	}
+	return s.bus.Publish(ctx, usr.PullEvents())
 }
 
 func (s Service) GetByID(ctx context.Context, id string) (View, error) {
@@ -75,5 +86,10 @@ func (s Service) List(ctx context.Context, cr storage.Criteria) ([]View, storage
 }
 
 func (s Service) Delete(ctx context.Context, id string) error {
-	return s.repo.Remove(ctx, id)
+	if err := s.repo.Remove(ctx, id); err != nil {
+		return err
+	}
+	usr := User{}
+	usr.delete(id)
+	return s.bus.Publish(ctx, usr.PullEvents())
 }

@@ -9,14 +9,18 @@ import (
 	"github.com/maestre3d/coinlog/domain/contact"
 	"github.com/maestre3d/coinlog/domain/financialaccount"
 	"github.com/maestre3d/coinlog/domain/user"
+	"github.com/maestre3d/coinlog/messaging"
+	"github.com/maestre3d/coinlog/messaging/kafka"
 	"github.com/maestre3d/coinlog/storage/sql"
 	"github.com/maestre3d/coinlog/transport/http"
+	"github.com/maestre3d/coinlog/transport/stream"
 )
 
 var kernelCfgSet = wire.NewSet(
 	coinlog.NewConfig,
 	http.NewConfig,
 	sql.NewConfig,
+	kafka.NewConfig,
 	wire.Struct(new(coinlogHTTPConfig), "*"),
 )
 
@@ -46,6 +50,7 @@ var cardSet = wire.NewSet(
 	sql.NewCardStorage,
 	card.NewService,
 	http.NewCardController,
+	stream.NewUserController,
 )
 
 // Holds all controllers for HTTP protocol, wire auto-binds inner deps.
@@ -73,10 +78,30 @@ func provideHttpRoutes(cfg coinlogHTTPConfig, ctrls httpCtrl) *http.ControllerMa
 	return mapper
 }
 
+// Holds all controllers for streams, wire auto-binds inner deps.
+type streamCtrl struct {
+	User stream.UserController
+}
+
+func provideStreamSubscribers(ctrls streamCtrl) *stream.ControllerMapper {
+	mapper := stream.NewControllerMapper()
+	// Add desired controllers here in single liner -method accepts variadic-.
+	//
+	// e.g. mux.Add(ctrls.Report, ctrls.Foo, ctrls.Bar)
+	mapper.Add(
+		ctrls.User,
+	)
+	return mapper
+}
+
 func NewCoinlogHTTP() (*CoinlogHTTP, func(), error) {
 	wire.Build(
 		kernelCfgSet,
 		sql.NewEntClientWithAutoMigrate,
+		kafka.NewWriter,
+		wire.Bind(new(messaging.Writer), new(kafka.Writer)),
+		kafka.NewReader,
+		wire.Bind(new(messaging.Reader), new(kafka.Reader)),
 		userSet,
 		contactSet,
 		finAccountSet,
@@ -84,7 +109,10 @@ func NewCoinlogHTTP() (*CoinlogHTTP, func(), error) {
 		http.NewHealthcheckController,
 		wire.Struct(new(httpCtrl), "*"),
 		provideHttpRoutes,
+		wire.Struct(new(streamCtrl), "*"),
+		provideStreamSubscribers,
 		http.NewEcho,
+		stream.NewBus,
 		wire.Struct(new(CoinlogHTTP), "*"),
 	)
 	return nil, nil, nil

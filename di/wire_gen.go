@@ -13,8 +13,10 @@ import (
 	"github.com/maestre3d/coinlog/domain/contact"
 	"github.com/maestre3d/coinlog/domain/financialaccount"
 	"github.com/maestre3d/coinlog/domain/user"
+	"github.com/maestre3d/coinlog/messaging/kafka"
 	"github.com/maestre3d/coinlog/storage/sql"
 	"github.com/maestre3d/coinlog/transport/http"
+	"github.com/maestre3d/coinlog/transport/stream"
 )
 
 // Injectors from wire.go:
@@ -23,10 +25,12 @@ func NewCoinlogHTTP() (*CoinlogHTTP, func(), error) {
 	config := coinlog.NewConfig()
 	httpConfig := http.NewConfig()
 	sqlConfig := sql.NewConfig()
+	kafkaConfig := kafka.NewConfig()
 	diCoinlogHTTPConfig := coinlogHTTPConfig{
-		Application: config,
-		Server:      httpConfig,
-		Database:    sqlConfig,
+		Application:   config,
+		Server:        httpConfig,
+		Database:      sqlConfig,
+		MessageBroker: kafkaConfig,
 	}
 	healthcheckController := http.NewHealthcheckController()
 	client, cleanup, err := sql.NewEntClientWithAutoMigrate(sqlConfig)
@@ -34,8 +38,21 @@ func NewCoinlogHTTP() (*CoinlogHTTP, func(), error) {
 		return nil, nil, err
 	}
 	userStorage := sql.NewUserStorage(client)
-	service := user.NewService(userStorage)
-	userController := http.NewUserController(service)
+	writer, cleanup2 := kafka.NewWriter(kafkaConfig)
+	reader := kafka.NewReader(kafkaConfig)
+	userController := stream.NewUserController()
+	diStreamCtrl := streamCtrl{
+		User: userController,
+	}
+	controllerMapper := provideStreamSubscribers(diStreamCtrl)
+	bus := stream.NewBus(writer, reader, controllerMapper)
+	service, err := user.NewService(userStorage, bus)
+	if err != nil {
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	httpUserController := http.NewUserController(service)
 	contactStorage := sql.NewContactStorage(client)
 	contactService := contact.NewService(contactStorage)
 	contactController := http.NewContactController(contactService)
@@ -47,25 +64,27 @@ func NewCoinlogHTTP() (*CoinlogHTTP, func(), error) {
 	cardController := http.NewCardController(cardService)
 	diHttpCtrl := httpCtrl{
 		Healthcheck: healthcheckController,
-		User:        userController,
+		User:        httpUserController,
 		Contact:     contactController,
 		FinAccount:  financialAccountController,
 		Card:        cardController,
 	}
-	controllerMapper := provideHttpRoutes(diCoinlogHTTPConfig, diHttpCtrl)
-	echo := http.NewEcho(httpConfig, controllerMapper)
+	httpControllerMapper := provideHttpRoutes(diCoinlogHTTPConfig, diHttpCtrl)
+	echo := http.NewEcho(httpConfig, httpControllerMapper)
 	coinlogHTTP := &CoinlogHTTP{
 		Config: diCoinlogHTTPConfig,
 		Echo:   echo,
+		Bus:    bus,
 	}
 	return coinlogHTTP, func() {
+		cleanup2()
 		cleanup()
 	}, nil
 }
 
 // wire.go:
 
-var kernelCfgSet = wire.NewSet(coinlog.NewConfig, http.NewConfig, sql.NewConfig, wire.Struct(new(coinlogHTTPConfig), "*"))
+var kernelCfgSet = wire.NewSet(coinlog.NewConfig, http.NewConfig, sql.NewConfig, kafka.NewConfig, wire.Struct(new(coinlogHTTPConfig), "*"))
 
 var userSet = wire.NewSet(wire.Bind(new(user.Repository), new(sql.UserStorage)), sql.NewUserStorage, user.NewService, http.NewUserController)
 
@@ -73,7 +92,7 @@ var contactSet = wire.NewSet(wire.Bind(new(contact.Repository), new(sql.ContactS
 
 var finAccountSet = wire.NewSet(wire.Bind(new(financialaccount.Repository), new(sql.FinancialAccountStorage)), sql.NewFinancialAccountStorage, financialaccount.NewService, http.NewFinancialController)
 
-var cardSet = wire.NewSet(wire.Bind(new(card.Repository), new(sql.CardStorage)), sql.NewCardStorage, card.NewService, http.NewCardController)
+var cardSet = wire.NewSet(wire.Bind(new(card.Repository), new(sql.CardStorage)), sql.NewCardStorage, card.NewService, http.NewCardController, stream.NewUserController)
 
 // Holds all controllers for HTTP protocol, wire auto-binds inner deps.
 type httpCtrl struct {
@@ -94,6 +113,20 @@ func provideHttpRoutes(cfg coinlogHTTPConfig, ctrls httpCtrl) *http.ControllerMa
 		ctrls.Contact,
 		ctrls.FinAccount,
 		ctrls.Card,
+	)
+	return mapper
+}
+
+// Holds all controllers for streams, wire auto-binds inner deps.
+type streamCtrl struct {
+	User stream.UserController
+}
+
+func provideStreamSubscribers(ctrls streamCtrl) *stream.ControllerMapper {
+	mapper := stream.NewControllerMapper()
+
+	mapper.Add(
+		ctrls.User,
 	)
 	return mapper
 }

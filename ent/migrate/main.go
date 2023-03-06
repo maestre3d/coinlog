@@ -33,7 +33,7 @@ func main() {
 		log.Fatalln("migration name is required. Use: 'go run -mod=mod ent/migrate/main.go <name>'")
 	}
 	// Generate migrations using Atlas support for Postgres (note the Ent dialect option passed above).
-	err = migrate.NamedDiff(ctx, "postgres://postgres:root@localhost:6432/coinlog?sslmode=disable", os.Args[1], opts...)
+	err = migrate.NamedDiff(ctx, "postgres://postgres:root@coinlog-postgres.coinlog.svc.cluster.local:5432/coinlog?sslmode=disable", os.Args[1], opts...)
 	if err != nil {
 		log.Fatalf("failed generating migration file: %v", err)
 	}
