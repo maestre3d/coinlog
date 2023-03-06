@@ -80,7 +80,7 @@ psql user=postgres
 postgres=# CREATE DATABASE coinlog;
 ```
 
-#### Application deployment
+#### Backend Application deployment
 
 First, build the docker image:
 
@@ -107,6 +107,42 @@ kubectl apply -f deployments/coinlog-http-api/coinlog.yml
 _This will deploy 3 node stateless replicas._
 
 If `api.coinlog.info` hostname was not set, run the command:
+
+```shell
+echo "127.0.0.1 api.coinlog.info" >> /etc/hosts
+```
+
+_This will enable external traffic to nginx edge proxy_.
+
+Finally, export application nodes to cluster-external traffic:
+
+```shell
+kubectl port-forward services/coinlog-http-api-svc 8080:8080
+```
+
+_Or just use nginx ingress (localhost:80 or api.coinlog.info)._
+
+More information about `k8s nginx ingress controller` [here](https://kubernetes.io/docs/tasks/access-application-cluster/ingress-minikube/).
+
+#### Frontend Web Application deployment
+
+First, build the docker image:
+
+```shell
+docker build -t coinlog/web-client:0.0.1 -f ./deployments/coinlog-web-client/Dockerfile ./client/coinlog-web
+```
+
+_NOTE: Use image tags to perform rolling updates for deployments. Every change will require to update the K8s YAML._
+
+Then, perform the actual deployment:
+
+```shell
+kubectl apply -f deployments/coinlog-web-client/coinlog-web.yml
+```
+
+_This will deploy 3 node stateless replicas._
+
+If `app.coinlog.info` hostname was not set, run the command:
 
 ```shell
 echo "127.0.0.1 api.coinlog.info" >> /etc/hosts
