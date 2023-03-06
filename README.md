@@ -8,6 +8,14 @@
 
 `Coinlog` is an assistant to keep track of your personal finance records.
 
+- [:coin: Coinlog](#coin-coinlog)
+  - [How-To](#how-to)
+    - [Setup local environment](#setup-local-environment)
+      - [Apache Kafka deployment](#apache-kafka-deployment)
+      - [Postgres deployment](#postgres-deployment)
+      - [Backend Application deployment](#backend-application-deployment)
+      - [Frontend Web Application deployment](#frontend-web-application-deployment)
+
 ## How-To
 
 ### Setup local environment
